@@ -1,4 +1,4 @@
-package com.papito.simuladorprovas.ui.screens
+package com.papito.provas.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.papito.simuladorprovas.model.Question
+import com.papito.provas.model.Question
 
 @Composable
 fun ResultScreen(

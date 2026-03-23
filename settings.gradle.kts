@@ -17,6 +17,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SimuladorProvas"
+rootProject.name = "Provas"
 include(":app")
 

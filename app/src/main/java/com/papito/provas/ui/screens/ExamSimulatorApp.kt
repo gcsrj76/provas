@@ -1,6 +1,5 @@
-package com.papito.simuladorprovas.ui.screens
+package com.papito.provas.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.BorderStroke
@@ -13,8 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.papito.simuladorprovas.data.DatabaseHelper
-import com.papito.simuladorprovas.model.Question
+import com.papito.provas.data.DatabaseHelper
+import com.papito.provas.model.Question
 
 @Composable
 fun ExamSimulatorApp(
@@ -97,7 +96,7 @@ fun ExamSimulatorApp(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Simulador de Provas",
+                            "Prov@s",
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

@@ -1,4 +1,4 @@
-package com.papito.simuladorprovas.model
+package com.papito.provas.model
 
 data class Question(
     val id: Int,

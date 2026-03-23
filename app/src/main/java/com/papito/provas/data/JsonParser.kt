@@ -1,9 +1,9 @@
-package com.papito.simuladorprovas.data
+package com.papito.provas.data
 
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
-import com.papito.simuladorprovas.model.Question
+import com.papito.provas.model.Question
 import org.json.JSONArray
 
 object JsonParser {

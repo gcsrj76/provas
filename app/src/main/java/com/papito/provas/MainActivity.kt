@@ -1,4 +1,4 @@
-package com.papito.simuladorprovas
+package com.papito.provas
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
@@ -7,10 +7,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateListOf
-import com.papito.simuladorprovas.data.DatabaseHelper
-import com.papito.simuladorprovas.model.Question
-import com.papito.simuladorprovas.ui.screens.ExamSimulatorApp
-import com.papito.simuladorprovas.data.JsonParser
+import com.papito.provas.data.DatabaseHelper
+import com.papito.provas.model.Question
+import com.papito.provas.ui.screens.ExamSimulatorApp
+import com.papito.provas.data.JsonParser
 
 class MainActivity : ComponentActivity() {
     private val questoesCarregadas = mutableStateListOf<Question>()

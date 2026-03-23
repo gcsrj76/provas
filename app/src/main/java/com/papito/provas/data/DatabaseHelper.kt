@@ -1,11 +1,11 @@
-package com.papito.simuladorprovas.data
+package com.papito.provas.data
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
 import android.widget.Toast
-import com.papito.simuladorprovas.model.Question
+import com.papito.provas.model.Question
 import java.io.File
 
 class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "simulador.db", null, 1) {

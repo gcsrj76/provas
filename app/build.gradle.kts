@@ -6,11 +6,11 @@ plugins {
 
 android {
     // Ajustei o namespace para algo mais pessoal, mas sinta-se à vontade para mudar
-    namespace = "com.papito.simuladorprovas"
+    namespace = "com.papito.provas"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.papito.simuladorprovas"
+        applicationId = "com.papito.provas"
         minSdk = 26 // Android 8.0+, melhor suporte para apps modernos
         targetSdk = 34
         versionCode = 1

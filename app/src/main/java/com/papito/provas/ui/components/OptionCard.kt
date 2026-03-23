@@ -1,7 +1,6 @@
-package com.papito.simuladorprovas.ui.components
+package com.papito.provas.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
