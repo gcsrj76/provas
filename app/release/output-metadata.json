@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.papito.simuladorprovas",
+  "applicationId": "com.papito.provas",
   "variantName": "release",
   "elements": [
     {

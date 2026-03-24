@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import com.papito.provas.data.DatabaseHelper
 import com.papito.provas.model.Question
+import com.papito.provas.model.Answer
 
 class ExamViewModel(application: Application) : AndroidViewModel(application) {
     private val dbHelper = DatabaseHelper(application)
@@ -14,55 +15,69 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         // Carrega os dados assim que o ViewModel é criado
-        carregarDadosDoBanco()
+        loadQuestionsFromDatabase()
     }
 
-    fun carregarDadosDoBanco() {
+    fun loadQuestionsFromDatabase() {
         val db = dbHelper.readableDatabase
-        try {
-            val cursor = db.rawQuery(
-                "SELECT id, pergunta, opcao_a, opcao_b, opcao_c, opcao_d, correta, texto_referencia, resposta_dada FROM questoes",
-                null
-            )
-            questoesCarregadas.clear()
+        val newQuestionsList = mutableListOf<Question>()
 
-            while (cursor.moveToNext()) {
-                questoesCarregadas.add(
-                    Question(
-                        id = cursor.getInt(0),
-                        pergunta = cursor.getString(1),
-                        opcaoA = cursor.getString(2),
-                        opcaoB = cursor.getString(3),
-                        opcaoC = cursor.getString(4),
-                        opcaoD = cursor.getString(5),
-                        correta = cursor.getString(6),
-                        textoReferencia = cursor.getString(7),
-                        respostaDada = cursor.getString(8)
-                    )
-                )
+        val cursor = db.rawQuery("SELECT * FROM questions", null)
+
+        while (cursor.moveToNext()) {
+            val qId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+
+            // BUSCA AS RESPOSTAS DESTA QUESTÃO ESPECÍFICA
+            val ansCursor = db.rawQuery(
+                "SELECT * FROM answers WHERE question_id = ? ORDER BY sort_order ASC",
+                arrayOf(qId.toString())
+            )
+
+            val answerList = mutableListOf<Answer>()
+            while (ansCursor.moveToNext()) {
+                answerList.add(Answer(
+                    id = ansCursor.getInt(ansCursor.getColumnIndexOrThrow("id")),
+                    questionId = qId,
+                    text = ansCursor.getString(ansCursor.getColumnIndexOrThrow("text")),
+                    isCorrect = ansCursor.getInt(ansCursor.getColumnIndexOrThrow("is_correct")) == 1,
+                    sortOrder = ansCursor.getInt(ansCursor.getColumnIndexOrThrow("sort_order"))
+                ))
             }
-            cursor.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
+            ansCursor.close()
+
+            // MONTA O OBJETO COMPLETO
+            newQuestionsList.add(Question(
+                id = qId,
+                statement = cursor.getString(cursor.getColumnIndexOrThrow("statement")),
+                answers = answerList, // Lista populada acima
+                referenceText = cursor.getString(cursor.getColumnIndexOrThrow("reference_text")),
+                givenAnswerId = if (cursor.isNull(cursor.getColumnIndexOrThrow("given_answer_id"))) null
+                else cursor.getInt(cursor.getColumnIndexOrThrow("given_answer_id"))
+            ))
         }
+        cursor.close()
+
+        // Atualiza a SnapshotStateList da UI
+        questoesCarregadas.clear()
+        questoesCarregadas.addAll(newQuestionsList)
+    }
+
+    fun selectAnswer(questionId: Int, answerId: Int) {
+        // 1. Salva no banco de dados imediatamente
+        dbHelper.saveUserAnswer(questionId, answerId)
+
+        // 2. Sincroniza a memória com o banco
+        // Isso atualiza a lista 'questoesCarregadas' e reflete na UI
+        loadQuestionsFromDatabase()
     }
 
     fun resetarBancoCompleto() {
-        dbHelper.limparQuestoes()
+        dbHelper.clearDatabase()
         questoesCarregadas.clear()
     }
 
     fun limparApenasRespostas() {
-        dbHelper.limparApenasRespostas()
-        // Atualiza a lista em memória para refletir que não há mais respostas
-        val listaAtualizada = questoesCarregadas.map { it.copy(respostaDada = null) }
-        questoesCarregadas.clear()
-        questoesCarregadas.addAll(listaAtualizada)
-    }
-
-    fun salvarRespostas(respostas: Map<Int, String>) {
-        dbHelper.salvarTodasAsRespostas(respostas)
-        // Opcional: recarregar do banco para garantir sincronia
-        carregarDadosDoBanco()
+        dbHelper.clearUserAnswers()
+        loadQuestionsFromDatabase()
     }
 }

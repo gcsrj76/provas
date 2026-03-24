@@ -26,7 +26,7 @@ fun OptionCard(
     isCorrect: Boolean?,
     isClickable: Boolean,
     onClick: () -> Unit,
-    correctOptionText: String? = null
+    correctAnswerLetter: String? = null
 ) {
     // Lógica da borda colorida (Verde para acerto, Vermelho para erro)
     val borderStroke = when {
@@ -67,7 +67,7 @@ fun OptionCard(
 
             if (isCorrect == false && isSelected) {
                 Text(
-                    text = "✓ Resposta correta: ${correctOptionText ?: ""}",
+                    text = "✓ Resposta correta: ${correctAnswerLetter ?: ""}",
                     color = Color(0xFF4CAF50),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp)

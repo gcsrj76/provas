@@ -17,17 +17,18 @@ import com.papito.provas.model.Question
 
 @Composable
 fun ResultScreen(
-    questoes: SnapshotStateList<Question>,
-    selectedAnswers: Map<Int, String>,
+    questions: SnapshotStateList<Question>,
     onVoltarMenu: () -> Unit,           // Apenas volta para a tela inicial
     onReiniciarSimulado: () -> Unit     // Limpa respostas e volta para o início do quiz
 ) {
-    val totalProva = questoes.size
-    val correctAnswers = selectedAnswers.count { (questionId, answer) ->
-        questoes.find { it.id == questionId }?.correta == answer
+
+    val totalQuestions = questions.size
+    val correctAnswers = questions.count { question ->
+        val selectedAnswer = question.answers.find { it.id == question.givenAnswerId }
+        selectedAnswer?.isCorrect == true
     }
 
-    val percentage = if (totalProva > 0) (correctAnswers * 100) / totalProva else 0
+    val scorePercentage = if (totalQuestions > 0) (correctAnswers * 100) / totalQuestions else 0
 
     Box(
         modifier = Modifier
@@ -59,7 +60,7 @@ fun ResultScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "$correctAnswers/$totalProva",
+                        text = "$correctAnswers/$totalQuestions",
                         color = Color.White,
                         fontSize = 64.sp,
                         fontWeight = FontWeight.ExtraBold
@@ -74,8 +75,8 @@ fun ResultScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "$percentage% de aproveitamento",
-                        color = if (percentage >= 70) Color(0xFF00FFBC) else Color(0xFFF44336),
+                        text = "$scorePercentage% de aproveitamento",
+                        color = if (scorePercentage >= 70) Color(0xFF00FFBC) else Color(0xFFF44336),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )

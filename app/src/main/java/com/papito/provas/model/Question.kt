@@ -1,13 +1,16 @@
 package com.papito.provas.model
 
+data class Answer(
+    val id: Int = 0,
+    val questionId: Int,
+    val text: String,
+    val isCorrect: Boolean,
+    val sortOrder: Int // 0 para A, 1 para B, etc.
+)
 data class Question(
     val id: Int,
-    val pergunta: String,
-    val opcaoA: String,
-    val opcaoB: String,
-    val opcaoC: String,
-    val opcaoD: String,
-    val correta: String,
-    val textoReferencia: String? = null,
-    var respostaDada: String? = null // Adicione este campo
+    val statement: String,
+    val answers: List<Answer> = emptyList(),
+    val referenceText: String? = null,
+    var givenAnswerId: Int? = null // Agora armazena o ID da Answer selecionada
 )

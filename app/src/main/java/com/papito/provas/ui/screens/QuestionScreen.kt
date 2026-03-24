@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.papito.provas.model.Question
 import com.papito.provas.ui.components.OptionCard
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.runtime.remember
@@ -29,30 +28,38 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.positionChange
+import com.papito.provas.viewmodel.ExamViewModel
 import kotlin.math.abs // Para a função abs() de distância
 
 @Composable
 fun QuestionScreen(
-    questoes: SnapshotStateList<Question>,
+    viewModel: ExamViewModel,
     currentIndex: Int,
-    selectedAnswers: Map<Int, String>,
-    answeredQuestions: Set<Int>,
-    onAnswerSelected: (Int, String) -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
     onFinalizar: () -> Unit,
     onQuestionSelect: (Int) -> Unit
 ) {
-    val currentQuestion = questoes[currentIndex]
-    val isAnswered = answeredQuestions.contains(currentQuestion.id)
+    val questions = viewModel.questoesCarregadas
+    if (questions.isEmpty()) return
 
-    val correctCount = selectedAnswers.count { (id, answer) ->
-        questoes.find { it.id == id }?.correta == answer
+    val currentQuestion = questions[currentIndex]
+    val scrollState = rememberScrollState()
+
+    val correctCount = questions.count { question ->
+        question.answers.find { it.id == question.givenAnswerId }?.isCorrect == true
     }
-    val errorCount = answeredQuestions.size - correctCount
+
+    val wrongCount = questions.count { question ->
+        val selectedAnswer = question.answers.find { it.id == question.givenAnswerId }
+        question.givenAnswerId != null && selectedAnswer?.isCorrect == false
+    }
 
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
+
+    // Função utilitária para converter ordem (0,1,2...) em letra (a,b,c...)
+    fun getLetterByOrder(order: Int): String = ('a' + order).toString()
 
     Column(
         modifier = Modifier
@@ -95,13 +102,13 @@ fun QuestionScreen(
             }
     )
     {
-        // --- HEADER COM SLIDER E CONTADORES ---
+        // --- CABEÇALHO (Paginação) ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Questão ${currentIndex + 1}/${questoes.size}",
+                text = "Questão ${currentIndex + 1}/${questions.size}",
                 color = Color.White,
                 fontSize = 14.sp
             )
@@ -109,7 +116,7 @@ fun QuestionScreen(
             Slider(
                 value = currentIndex.toFloat(),
                 onValueChange = { onQuestionSelect(it.toInt()) },
-                valueRange = 0f..(if (questoes.size > 1) (questoes.size - 1).toFloat() else 1f),
+                valueRange = 0f..(if (questions.size > 1) (questions.size - 1).toFloat() else 1f),
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
@@ -129,7 +136,7 @@ fun QuestionScreen(
                     modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFF44336)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("$errorCount", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("$wrongCount", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -144,8 +151,9 @@ fun QuestionScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            // Enunciado
             Text(
-                text = "${currentIndex + 1}) ${currentQuestion.pergunta}",
+                text = "${currentIndex + 1}) ${currentQuestion.statement}",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -153,26 +161,25 @@ fun QuestionScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            val options = listOf(
-                "a" to currentQuestion.opcaoA,
-                "b" to currentQuestion.opcaoB,
-                "c" to currentQuestion.opcaoC,
-                "d" to currentQuestion.opcaoD
-            )
+            // --- LISTA DINÂMICA DE RESPOSTAS ---
+            currentQuestion.answers.forEach { answer ->
+                val isSelected = currentQuestion.givenAnswerId == answer.id
 
-            options.forEach { (letra, texto) ->
                 OptionCard(
-                    letra = letra,
-                    texto = texto,
-                    isSelected = selectedAnswers[currentQuestion.id] == letra,
-                    isCorrect = if (isAnswered) letra == currentQuestion.correta else null,
-                    isClickable = !isAnswered,
-                    onClick = { onAnswerSelected(currentQuestion.id, letra) },
-                    correctOptionText = if (isAnswered && letra != currentQuestion.correta) {
-                        currentQuestion.correta
-                    } else null
+                    letra = getLetterByOrder(answer.sortOrder),
+                    texto = answer.text,
+                    isSelected = isSelected,
+                    // Mostra se está correto apenas se a questão já tiver uma resposta dada
+                    isCorrect = if (currentQuestion.givenAnswerId != null) answer.isCorrect else null,
+                    isClickable = currentQuestion.givenAnswerId == null,
+                    onClick = {
+                        viewModel.selectAnswer(currentQuestion.id, answer.id)
+                    },
+                    correctAnswerLetter = currentQuestion.answers
+                        .find { it.isCorrect }
+                        ?.let { getLetterByOrder(it.sortOrder) } ?: ""
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
 
@@ -208,7 +215,7 @@ fun QuestionScreen(
 
             Button(
                 onClick = {
-                    if (currentIndex == questoes.size - 1) {
+                    if (currentIndex == questions.size - 1) {
                         // Se for a última questão, chama a função de finalizar (que grava no banco)
                         onFinalizar()
                     } else {
@@ -223,7 +230,7 @@ fun QuestionScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
             ) {
                 Text(
-                    text = if (currentIndex == questoes.size - 1) "Finalizar" else "Próxima",
+                    text = if (currentIndex == questions.size - 1) "Finalizar" else "Próxima",
                     color = Color.White
                 )
             }

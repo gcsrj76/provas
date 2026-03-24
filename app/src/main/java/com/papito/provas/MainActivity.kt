@@ -38,13 +38,13 @@ class MainActivity : ComponentActivity() {
                 val dbHelper = DatabaseHelper(this)
 
                 if (isJson) {
-                    JsonParser.importarQuestoesJSON(this, it)
-                } else {
+                    JsonParser.importQuestionsJSON(this, it)
+                } /**else {
                     dbHelper.importarQuestoesDB(it)
-                }
+                }*/
 
                 // Após importar, avisamos o ViewModel para recarregar os dados
-                viewModel.carregarDadosDoBanco()
+                viewModel.loadQuestionsFromDatabase()
 
                 Toast.makeText(this, "Importação finalizada!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
