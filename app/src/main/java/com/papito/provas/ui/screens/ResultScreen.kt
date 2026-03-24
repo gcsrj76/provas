@@ -96,11 +96,11 @@ fun ResultScreen(
                         .height(56.dp), // Altura padrão Material Design
                     shape = RoundedCornerShape(12.dp), // Bordas levemente arredondadas, não pílula
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF2196F3) // Azul mais moderno
+                        containerColor = Color(0xFF009688) // Azul mais moderno
                     )
                 ) {
                     Text(
-                        "Voltar ao Menu Inicial",
+                        "Tela Principal",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )

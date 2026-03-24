@@ -4,9 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
-import android.widget.Toast
-import com.papito.provas.model.Question
-import java.io.File
+import android.net.Uri
 
 class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "simulador.db", null, 1) {
 
@@ -106,53 +104,48 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         }
     }
 
-    /** Sera substituido por uma funçao de criaçao/restauraçao de backup
-    fun importarQuestoesDB(uri: android.net.Uri) {
-        try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val tempFile = File(context.cacheDir, "temp_questoes.db")
+    fun backupDatabase(context: Context, outUri: Uri): Boolean {
+        val db = this.writableDatabase
 
-            inputStream?.use { input ->
-                tempFile.outputStream().use { output -> input.copyTo(output) }
+        return try {
+            db.rawQuery("PRAGMA wal_checkpoint(FULL);", null).use { it.moveToFirst() }
+            this.close()
+
+            val dbName = "simulador.db"
+            val dbFile = context.getDatabasePath(dbName)
+
+            if (dbFile.exists() && dbFile.length() > 0) {
+                context.contentResolver.openOutputStream(outUri)?.use { output ->
+                    dbFile.inputStream().use { input ->
+                        input.copyTo(output)
+                    }
+                }
+                true
+            } else {
+                android.util.Log.e("BACKUP_ERROR", "Arquivo não encontrado ou vazio em: ${dbFile.absolutePath}")
+                false
             }
-
-            val externalDatabase = SQLiteDatabase.openDatabase(
-                tempFile.absolutePath,
-                null,
-                SQLiteDatabase.OPEN_READONLY
-            )
-
-            val cursor = externalDatabase.rawQuery(
-                "SELECT id, pergunta, opcao_a, opcao_b, opcao_c, opcao_d, correta, texto_referencia FROM questoes", 
-                null
-            )
-
-            val dbInterno = this.writableDatabase
-
-            while (cursor.moveToNext()) {
-                val qBase = Question(
-                    id = 0,
-                    pergunta = cursor.getString(1),
-                    opcaoA = cursor.getString(2),
-                    opcaoB = cursor.getString(3),
-                    opcaoC = cursor.getString(4),
-                    opcaoD = cursor.getString(5),
-                    correta = cursor.getString(6),
-                    textoReferencia = cursor.getString(7)
-                )
-                inserirQuestao(dbInterno, qBase)
-            }
-
-            cursor.close()
-            externalDatabase.close()
-            dbInterno.close()
-
-            Toast.makeText(context, "Banco de dados importado!", Toast.LENGTH_SHORT).show()
-
         } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Erro no DB: ${e.message}", Toast.LENGTH_LONG).show()
+            android.util.Log.e("BACKUP_ERROR", "Falha catastrófica: ${e.message}")
+            false
         }
     }
-    */
+
+    fun restoreDatabase(context: Context, inUri: Uri): Boolean {
+        return try {
+            this.close() // Crucial: fecha o banco antes de sobrescrever o arquivo
+
+            val dbFile = context.getDatabasePath("simulador.db")
+
+            context.contentResolver.openInputStream(inUri)?.use { input ->
+                dbFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }

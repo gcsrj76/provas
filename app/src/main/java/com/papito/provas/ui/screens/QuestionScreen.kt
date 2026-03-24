@@ -38,6 +38,7 @@ fun QuestionScreen(
     onNext: () -> Unit,
     onPrevious: () -> Unit,
     onFinalizar: () -> Unit,
+    onPausar: () -> Unit,
     onQuestionSelect: (Int) -> Unit
 ) {
     val questions = viewModel.questoesCarregadas
@@ -92,7 +93,7 @@ fun QuestionScreen(
                     if (dragged) {
                         if (offsetX < -160) onNext()
                         else if (offsetX > 160) onPrevious()
-                        else if (offsetY < -250) onFinalizar()
+                        //else if (offsetY < -250) onFinalizar()
                     }
 
                     // Reseta para o próximo toque
@@ -177,7 +178,7 @@ fun QuestionScreen(
                     },
                     correctAnswerLetter = currentQuestion.answers
                         .find { it.isCorrect }
-                        ?.let { getLetterByOrder(it.sortOrder) } ?: ""
+                        ?.let { getLetterByOrder(it.sortOrder).uppercase() } ?: ""
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -203,7 +204,7 @@ fun QuestionScreen(
             }
 
             OutlinedButton(
-                onClick = {onFinalizar()},
+                onClick = {onPausar()},
                 modifier = Modifier
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),

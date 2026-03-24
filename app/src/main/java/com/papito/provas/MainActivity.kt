@@ -10,11 +10,28 @@ import com.papito.provas.data.DatabaseHelper
 import com.papito.provas.data.JsonParser
 import com.papito.provas.ui.screens.ExamSimulatorApp
 import com.papito.provas.viewmodel.ExamViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
     // Instancia o ViewModel de forma delegada
     private val viewModel: ExamViewModel by viewModels()
+
+    // Launcher para CRIAR o arquivo de backup
+    private val createBackupLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri ->
+        uri?.let { viewModel.createBackup(it, this) }
+    }
+
+    // Launcher para SELECIONAR um backup existente
+    private val restoreBackupLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.restoreBackup(it, this) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +40,18 @@ class MainActivity : ComponentActivity() {
             // Passamos o viewModel inteiro para o App principal
             ExamSimulatorApp(
                 viewModel = viewModel,
-                onFilePickerClick = { filePickerLauncher.launch("*/*") }
+                onFilePickerClick = { filePickerLauncher.launch("*/*") },
+                onCreateBackup = { createBackupLauncher.launch(gerarNomeBackup()) },
+                onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) }
             )
         }
+    }
+
+    private fun gerarNomeBackup(): String {
+        val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+        val dataHoraAtual = sdf.format(Date())
+        // return "prova_bkp_$dataHoraAtual.db"
+        return "prova_bkp.db"
     }
 
     private val filePickerLauncher = registerForActivityResult(

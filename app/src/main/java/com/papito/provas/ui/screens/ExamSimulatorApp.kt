@@ -16,7 +16,9 @@ import com.papito.provas.viewmodel.ExamViewModel
 @Composable
 fun ExamSimulatorApp(
     viewModel: ExamViewModel,
-    onFilePickerClick: () -> Unit
+    onFilePickerClick: () -> Unit,
+    onCreateBackup: () -> Unit,
+    onRestoreBackup: () -> Unit
 ) {
     val questions = viewModel.questoesCarregadas
 
@@ -77,7 +79,29 @@ fun ExamSimulatorApp(
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(1.dp, Color.White)
                         ) {
-                            Text("Importar Questões (JSON/DB)", color = Color.White)
+                            Text("Importar Questões (JSON)", color = Color.White)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedButton(
+                            onClick = onCreateBackup,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, Color.White)
+                        ) {
+                            Text("Criar Backup", color = Color.White)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedButton(
+                            onClick = onRestoreBackup,
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, Color.White)
+                        ) {
+                            Text("Restaurar Backup", color = Color.White)
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -101,6 +125,10 @@ fun ExamSimulatorApp(
                     },
                     onPrevious = { if (currentQuestionIndex > 0) currentQuestionIndex-- },
                     onFinalizar = {
+                        showResult = true
+                        showQuestions = false
+                    },
+                    onPausar = {
                         showResult = false
                         showQuestions = false
                     },

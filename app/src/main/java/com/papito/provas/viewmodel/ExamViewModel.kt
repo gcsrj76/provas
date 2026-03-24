@@ -6,6 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import com.papito.provas.data.DatabaseHelper
 import com.papito.provas.model.Question
 import com.papito.provas.model.Answer
+import android.content.Context
+import android.net.Uri
+
 
 class ExamViewModel(application: Application) : AndroidViewModel(application) {
     private val dbHelper = DatabaseHelper(application)
@@ -79,5 +82,16 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
     fun limparApenasRespostas() {
         dbHelper.clearUserAnswers()
         loadQuestionsFromDatabase()
+    }
+
+    fun restoreBackup(uri: Uri, context: Context) {
+        if (dbHelper.restoreDatabase(context, uri)) {
+            // Após restaurar o arquivo físico, recarregamos a lista em memória
+            loadQuestionsFromDatabase()
+        }
+    }
+
+    fun createBackup(uri: Uri, context: Context) {
+        dbHelper.backupDatabase(context, uri)
     }
 }
