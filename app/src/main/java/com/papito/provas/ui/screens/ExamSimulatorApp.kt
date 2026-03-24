@@ -5,7 +5,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.KeyboardArrowUp   // Para o Backup
+import androidx.compose.material.icons.filled.KeyboardArrowDown // Para o Restore
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +30,8 @@ fun ExamSimulatorApp(
     onRestoreBackup: () -> Unit
 ) {
     val questions = viewModel.questoesCarregadas
+
+    val isSimuladoIniciado = questions.any { it.givenAnswerId != null }
 
     var currentQuestionIndex by remember(questions.size) {
         val firstPending = questions.indexOfFirst { it.givenAnswerId == null }
@@ -45,91 +54,121 @@ fun ExamSimulatorApp(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Prov@s",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("Prov@s", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                        Text("(${questions.size} questões)", color = Color.Gray, fontSize = 14.sp)
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
 
-                        Text(
-                            text = "${questions.size} questões carregadas",
-                            color = Color.Gray,
-                            fontSize = 16.sp
-                        )
 
-                        Spacer(modifier = Modifier.height(32.dp))
-
+                        // --- AÇÃO PRINCIPAL ---
                         Button(
-                            onClick = { if (questions.isNotEmpty()) showQuestions = true },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688)),
-                            enabled = questions.isNotEmpty()
+                            onClick = {
+                                if (questions.isNotEmpty()) {
+                                    val firstPending = questions.indexOfFirst { it.givenAnswerId == null }
+                                    currentQuestionIndex = if (firstPending != -1) firstPending else 0
+                                    viewModel.iniciarTimer()
+                                    showQuestions = true
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(64.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(
+                                    0xFF009688
+                                )
+                            )
                         ) {
-                            Text("Iniciar Simulado", fontSize = 18.sp, color = Color.White)
+                            Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "INICIAR SIMULADO",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        OutlinedButton(
-                            onClick = onFilePickerClick,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color.White)
-                        ) {
-                            Text("Importar Questões (JSON)", color = Color.White)
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                        // --- UTILITÁRIO DE ESTUDO ---
                         OutlinedButton(
                             onClick = { viewModel.shuffle() },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color.White)
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, if (isSimuladoIniciado) Color.DarkGray else Color.Gray),
+                            enabled = !isSimuladoIniciado // Desabilita se o simulado já começou
                         ) {
                             Icon(
                                 Icons.Default.Refresh,
                                 contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier.size(18.dp),
+                                // Muda a cor do ícone para parecer desabilitado
+                                tint = if (isSimuladoIniciado) Color.DarkGray else Color.White
                             )
-                            Text("Embaralhar Questões", color = Color.White)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "Embaralhar Ordem",
+                                color = if (isSimuladoIniciado) Color.DarkGray else Color.White
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(48.dp))
+
+                        // --- SEÇÃO TÉCNICA (Menos destaque) ---
+                        Text(
+                            "GERENCIAMENTO DE DADOS",
+                            color = Color.DarkGray,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Divider(
+                            color = Color.DarkGray,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            SmallTechnicalButton(
+                                "Backup",
+                                Icons.Default.KeyboardArrowUp,
+                                onCreateBackup,
+                                Modifier.weight(1f)
+                            )
+                            SmallTechnicalButton(
+                                "Restore",
+                                Icons.Default.KeyboardArrowDown,
+                                onRestoreBackup,
+                                Modifier.weight(1f)
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedButton(
-                            onClick = onCreateBackup,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color.White)
+                            onClick = onFilePickerClick,
+                            modifier = Modifier.fillMaxWidth(),
+                            border = BorderStroke(0.5.dp, Color.DarkGray)
                         ) {
-                            Text("Criar Backup", color = Color.White)
+                            Text("Importar JSON", color = Color.LightGray, fontSize = 13.sp)
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        OutlinedButton(
-                            onClick = onRestoreBackup,
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, Color.White)
-                        ) {
-                            Text("Restaurar Backup", color = Color.White)
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
 
                         if (questions.isNotEmpty()) {
-                            TextButton(onClick = { viewModel.resetarBancoCompleto() }) {
-                                Text("Limpar Banco de Dados", color = Color.Red)
+                            // --- ZONA DE PERIGO ---
+                            TextButton(
+                                onClick = { viewModel.resetarBancoCompleto() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Limpar tudo", color = Color.Red, fontSize = 12.sp)
                             }
                         }
+
                     }
                 }
             }
@@ -144,10 +183,12 @@ fun ExamSimulatorApp(
                     },
                     onPrevious = { if (currentQuestionIndex > 0) currentQuestionIndex-- },
                     onFinalizar = {
+                        viewModel.pararTimer()
                         showResult = true
                         showQuestions = false
                     },
                     onPausar = {
+                        viewModel.pararTimer()
                         showResult = false
                         showQuestions = false
                     },
@@ -159,6 +200,7 @@ fun ExamSimulatorApp(
             showResult -> {
                 ResultScreen(
                     questions = questions,
+                    viewModel.formatarTempo(),
                     onVoltarMenu = {
                         showResult = false
                         showQuestions = false
@@ -167,11 +209,36 @@ fun ExamSimulatorApp(
                     onReiniciarSimulado = {
                         viewModel.limparApenasRespostas()
                         showResult = false
-                        showQuestions = false
+                        showQuestions = true
                         currentQuestionIndex = 0
                     }
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SmallTechnicalButton(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(0.5.dp, Color.Gray),
+        contentPadding = PaddingValues(horizontal = 8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            tint = Color.White
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(text, color = Color.White, fontSize = 12.sp)
     }
 }

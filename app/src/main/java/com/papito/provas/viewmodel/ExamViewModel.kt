@@ -2,12 +2,19 @@ package com.papito.provas.viewmodel
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.papito.provas.data.DatabaseHelper
 import com.papito.provas.model.Question
 import com.papito.provas.model.Answer
 import android.content.Context
 import android.net.Uri
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class ExamViewModel(application: Application) : AndroidViewModel(application) {
@@ -15,6 +22,11 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
     
     // Objeto centralizado para acesso direto das telas
     val questoesCarregadas = mutableStateListOf<Question>()
+
+    var segundosDecorridos by mutableIntStateOf(0)
+        private set
+
+    private var timerJob: Job? = null
 
     init {
         // Carrega os dados assim que o ViewModel é criado
@@ -98,5 +110,28 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
     fun shuffle() {
         dbHelper.shuffleDatabasePhysically()
         loadQuestionsFromDatabase() // Recarrega a UI com a nova ordem vinda do DB
+    }
+
+    // Funções do Temporizador (Coroutines)
+    fun iniciarTimer() {
+        timerJob?.cancel()
+        segundosDecorridos = 0
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                segundosDecorridos++
+            }
+        }
+    }
+
+    fun pararTimer() {
+        timerJob?.cancel()
+        timerJob = null
+    }
+
+    fun formatarTempo(): String {
+        val minutos = segundosDecorridos / 60
+        val segundos = segundosDecorridos % 60
+        return "%02d:%02d".format(minutos, segundos)
     }
 }
