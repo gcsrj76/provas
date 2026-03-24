@@ -25,7 +25,7 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
         val db = dbHelper.readableDatabase
         val newQuestionsList = mutableListOf<Question>()
 
-        val cursor = db.rawQuery("SELECT * FROM questions", null)
+        val cursor = db.rawQuery("SELECT * FROM questions ORDER BY sort_order ASC", null)
 
         while (cursor.moveToNext()) {
             val qId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
@@ -93,5 +93,10 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
 
     fun createBackup(uri: Uri, context: Context) {
         dbHelper.backupDatabase(context, uri)
+    }
+
+    fun shuffle() {
+        dbHelper.shuffleDatabasePhysically()
+        loadQuestionsFromDatabase() // Recarrega a UI com a nova ordem vinda do DB
     }
 }

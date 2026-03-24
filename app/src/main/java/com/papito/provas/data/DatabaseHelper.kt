@@ -14,7 +14,8 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             statement TEXT NOT NULL,
             reference_text TEXT,
-            given_answer_id INTEGER -- Armazena o ID da tabela 'answers'    
+            given_answer_id INTEGER,
+            sort_order INTEGER  
     )
         """.trimIndent()
         db.execSQL(createTableQuestion)
@@ -146,6 +147,40 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         } catch (e: Exception) {
             e.printStackTrace()
             false
+        }
+    }
+
+    fun shuffleDatabasePhysically() {
+        val db = this.writableDatabase
+        db.beginTransaction()
+        try {
+            // 1. EMBARALHAR QUESTÕES
+            val questionIds = mutableListOf<Int>()
+            db.rawQuery("SELECT id FROM questions", null).use { cursor ->
+                while (cursor.moveToNext()) questionIds.add(cursor.getInt(0))
+            }
+
+            questionIds.shuffled().forEachIndexed { index, id ->
+                val values = ContentValues().apply { put("sort_order", index) }
+                db.update("questions", values, "id = ?", arrayOf(id.toString()))
+            }
+
+            // 2. EMBARALHAR RESPOSTAS (dentro de cada questão)
+            questionIds.forEach { qId ->
+                val answerIds = mutableListOf<Int>()
+                db.rawQuery("SELECT id FROM answers WHERE question_id = ?", arrayOf(qId.toString())).use { cursor ->
+                    while (cursor.moveToNext()) answerIds.add(cursor.getInt(0))
+                }
+
+                answerIds.shuffled().forEachIndexed { index, id ->
+                    val values = ContentValues().apply { put("sort_order", index) }
+                    db.update("answers", values, "id = ?", arrayOf(id.toString()))
+                }
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
         }
     }
 }
