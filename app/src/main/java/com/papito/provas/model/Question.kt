@@ -12,5 +12,6 @@ data class Question(
     val statement: String,
     val answers: List<Answer> = emptyList(),
     val referenceText: String? = null,
+    val tip: String? = null,
     var givenAnswerId: Int? = null // Agora armazena o ID da Answer selecionada
 )

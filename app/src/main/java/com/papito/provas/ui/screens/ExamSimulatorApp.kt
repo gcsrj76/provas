@@ -10,13 +10,13 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.KeyboardArrowUp   // Para o Backup
 import androidx.compose.material.icons.filled.KeyboardArrowDown // Para o Restore
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.Info // Ícone de ajuda
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,10 +27,10 @@ fun ExamSimulatorApp(
     viewModel: ExamViewModel,
     onFilePickerClick: () -> Unit,
     onCreateBackup: () -> Unit,
-    onRestoreBackup: () -> Unit
+    onRestoreBackup: () -> Unit,
+    onShowInstructions: () -> Unit // Nova ação para o botão de interrogação
 ) {
     val questions = viewModel.questoesCarregadas
-
     val isSimuladoIniciado = questions.any { it.givenAnswerId != null }
 
     var currentQuestionIndex by remember(questions.size) {
@@ -43,7 +43,7 @@ fun ExamSimulatorApp(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.Black // Mantendo o tema escuro solicitado
+        color = Color.Black
     ) {
         when {
             // --- TELA INICIAL (MENU) ---
@@ -64,7 +64,6 @@ fun ExamSimulatorApp(
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-
                         // --- AÇÃO PRINCIPAL ---
                         Button(
                             onClick = {
@@ -77,16 +76,12 @@ fun ExamSimulatorApp(
                             },
                             modifier = Modifier.fillMaxWidth().height(64.dp),
                             shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(
-                                    0xFF009688
-                                )
-                            )
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "INICIAR SIMULADO",
+                                text = if (isSimuladoIniciado) "CONTINUAR SIMULADO" else "INICIAR SIMULADO",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -100,13 +95,12 @@ fun ExamSimulatorApp(
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(16.dp),
                             border = BorderStroke(1.dp, if (isSimuladoIniciado) Color.DarkGray else Color.Gray),
-                            enabled = !isSimuladoIniciado // Desabilita se o simulado já começou
+                            enabled = !isSimuladoIniciado
                         ) {
                             Icon(
                                 Icons.Default.Refresh,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                // Muda a cor do ícone para parecer desabilitado
                                 tint = if (isSimuladoIniciado) Color.DarkGray else Color.White
                             )
                             Spacer(Modifier.width(8.dp))
@@ -115,9 +109,10 @@ fun ExamSimulatorApp(
                                 color = if (isSimuladoIniciado) Color.DarkGray else Color.White
                             )
                         }
+
                         Spacer(modifier = Modifier.height(48.dp))
 
-                        // --- SEÇÃO TÉCNICA (Menos destaque) ---
+                        // --- SEÇÃO TÉCNICA ---
                         Text(
                             "GERENCIAMENTO DE DADOS",
                             color = Color.DarkGray,
@@ -149,26 +144,49 @@ fun ExamSimulatorApp(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedButton(
-                            onClick = onFilePickerClick,
+                        // --- ÁREA DE IMPORTAÇÃO (80/20) ---
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            border = BorderStroke(0.5.dp, Color.DarkGray)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Importar JSON", color = Color.LightGray, fontSize = 13.sp)
+                            // Botão Importar (90%)
+                            OutlinedButton(
+                                onClick = onFilePickerClick,
+                                modifier = Modifier.weight(0.9f).height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(0.5.dp, Color.DarkGray)
+                            ) {
+                                Text("Importar JSON", color = Color.LightGray, fontSize = 13.sp)
+                            }
+
+                            // Botão Ajuda (10%)
+                            OutlinedButton(
+                                onClick = onShowInstructions,
+                                modifier = Modifier.weight(0.1f).height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(0.5.dp, Color.DarkGray),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "Instruções",
+                                    tint = Color.LightGray,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
 
                         if (questions.isNotEmpty()) {
-                            // --- ZONA DE PERIGO ---
                             TextButton(
                                 onClick = { viewModel.resetarBancoCompleto() },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                             ) {
                                 Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(8.dp))
                                 Text("Limpar tudo", color = Color.Red, fontSize = 12.sp)
                             }
                         }
-
                     }
                 }
             }
@@ -178,9 +196,7 @@ fun ExamSimulatorApp(
                 QuestionScreen(
                     viewModel = viewModel,
                     currentIndex = currentQuestionIndex,
-                    onNext = {
-                        if (currentQuestionIndex < questions.size - 1) currentQuestionIndex++
-                    },
+                    onNext = { if (currentQuestionIndex < questions.size - 1) currentQuestionIndex++ },
                     onPrevious = { if (currentQuestionIndex > 0) currentQuestionIndex-- },
                     onFinalizar = {
                         viewModel.pararTimer()
@@ -200,7 +216,7 @@ fun ExamSimulatorApp(
             showResult -> {
                 ResultScreen(
                     questions = questions,
-                    viewModel.formatarTempo(),
+                    tempoFormatado = viewModel.formatarTempo(),
                     onVoltarMenu = {
                         showResult = false
                         showQuestions = false

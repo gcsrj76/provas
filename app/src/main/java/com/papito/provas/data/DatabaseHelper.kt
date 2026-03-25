@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
 import android.net.Uri
 
-class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "simulador.db", null, 1) {
+class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "simulador.db", null, 3) {
 
     override fun onCreate(db: SQLiteDatabase) {
         val createTableQuestion = """
@@ -14,6 +14,7 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             statement TEXT NOT NULL,
             reference_text TEXT,
+            tip TEXT,
             given_answer_id INTEGER,
             sort_order INTEGER  
     )
@@ -39,13 +40,14 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         onCreate(db)
     }
 
-    fun insertFullQuestion(statement: String, refText: String?, answerList: List<Pair<String, Boolean>>) {
+    fun insertFullQuestion(statement: String, refText: String?, tip: String?, answerList: List<Pair<String, Boolean>>) {
         val db = this.writableDatabase
         db.beginTransaction()
         try {
             val qValues = ContentValues().apply {
                 put("statement", statement)
                 put("reference_text", refText)
+                put("tip", tip)
             }
             val questionId = db.insert("questions", null, qValues)
 

@@ -66,6 +66,7 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
                 statement = cursor.getString(cursor.getColumnIndexOrThrow("statement")),
                 answers = answerList, // Lista populada acima
                 referenceText = cursor.getString(cursor.getColumnIndexOrThrow("reference_text")),
+                tip = cursor.getString(cursor.getColumnIndexOrThrow("tip")),
                 givenAnswerId = if (cursor.isNull(cursor.getColumnIndexOrThrow("given_answer_id"))) null
                 else cursor.getInt(cursor.getColumnIndexOrThrow("given_answer_id"))
             ))

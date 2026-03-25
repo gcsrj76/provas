@@ -22,6 +22,7 @@ object JsonParser {
                 val statement = obj.getString("pergunta")
                 val referenceText = obj.optString("texto_referencia", null)
                 val correctLetter = obj.getString("correta").lowercase().trim()
+                val tip = obj.getString("dica").lowercase().trim()
 
                 // 2. Monta a lista de respostas convertendo o formato antigo para o novo
                 // Criamos os pares (Texto da Opção, É a correta?)
@@ -39,7 +40,7 @@ object JsonParser {
                 }
 
                 // 3. Insere no banco usando a lógica de duas tabelas (questions + answers)
-                dbHelper.insertFullQuestion(statement, referenceText, answerList)
+                dbHelper.insertFullQuestion(statement, referenceText,tip, answerList)
             }
 
             Toast.makeText(context, "JSON importado com sucesso!", Toast.LENGTH_SHORT).show()

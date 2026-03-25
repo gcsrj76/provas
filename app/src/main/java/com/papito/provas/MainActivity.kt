@@ -1,5 +1,6 @@
 package com.papito.provas
 
+import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -42,7 +43,8 @@ class MainActivity : ComponentActivity() {
                 viewModel = viewModel,
                 onFilePickerClick = { filePickerLauncher.launch("*/*") },
                 onCreateBackup = { createBackupLauncher.launch(gerarNomeBackup()) },
-                onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) }
+                onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) },
+                onShowInstructions = { exportarInstrucoesJson(this) }
             )
         }
     }
@@ -78,5 +80,57 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, "Erro: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun exportarInstrucoesJson(context: Context) {
+        val instrucoes = """
+        - Solicite a geraçao das questoes pela IA;
+        - Copie e cole o conteudo gerado em um arquivo;
+        - Salve o arquivo com uma extensao .json;
+         
+        Estrutura do arquivo JSON para importçao:
+        
+        O arquivo deve ser uma lista [] de objetos, seguindo este padrão:
+        "[
+        {
+        "pergunta": "Texto da pergunta",
+        "opcao_a": "Opção A",
+        "opcao_b": "Opção B",
+        "opcao_c": "Opção C",
+        "opcao_d": "Opção D",
+        "correta": "<opção correta>",
+        "link_conteudo": "Vazio",
+        "texto_referencia": "Vazio",
+        "materia": "Vazio"
+        }
+        ]"
+        
+        Exemplo de prompt de solicitaçao para a IA:        
+        
+        Monte um simulado gerando o maior numero de questões possíveis, baseado na ementa:
+        "Formação de palavras: derivação / Frase, oração e período / Tipos de verbo", e enquadre ao layout JSON : 
+        "[
+            {
+                "pergunta": "Texto da pergunta",
+                "opcao_a": "Opção A",
+                "opcao_b": "Opção B",
+                "opcao_c": "Opção C",
+                "opcao_d": "Opção D",
+                "correta": "<opção correta>",
+                "dica": "Conteudo para auxiliar o entendimento da questao",
+                "texto_referencia": "Vazio",
+                "materia": "Vazio"
+            }
+        ]"
+    """.trimIndent()
+
+        // Lógica para salvar ou compartilhar o texto...
+        val sendIntent: android.content.Intent = android.content.Intent().apply {
+            action = android.content.Intent.ACTION_SEND
+            putExtra(android.content.Intent.EXTRA_TEXT, instrucoes)
+            type = "text/plain"
+        }
+        val shareIntent = android.content.Intent.createChooser(sendIntent, "Salvar Instruções")
+        context.startActivity(shareIntent)
     }
 }
