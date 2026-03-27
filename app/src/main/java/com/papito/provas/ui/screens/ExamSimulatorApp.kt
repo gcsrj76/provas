@@ -150,14 +150,15 @@ fun ExamSimulatorApp(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+
                             // Botão Importar (90%)
                             OutlinedButton(
-                                onClick = onFilePickerClick,
+                                onClick = onImportGemini,
                                 modifier = Modifier.weight(0.9f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 border = BorderStroke(0.5.dp, Color.DarkGray)
                             ) {
-                                Text("Importar JSON", color = Color.LightGray, fontSize = 13.sp)
+                                Text("Importar Questões", color = Color.LightGray, fontSize = 13.sp)
                             }
 
                             // Botão Ajuda (10%)
@@ -178,16 +179,6 @@ fun ExamSimulatorApp(
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // Botão Importar (90%)
-                        OutlinedButton(
-                            onClick = onImportGemini,
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(0.5.dp, Color.DarkGray)
-                        ) {
-                            Text("Importar Gemini", color = Color.LightGray, fontSize = 13.sp)
-                        }
 
                         if (questions.isNotEmpty()) {
                             TextButton(

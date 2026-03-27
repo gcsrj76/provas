@@ -19,6 +19,11 @@ import com.google.firebase.ai.ai
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.ai.type.GenerativeBackend
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.papito.provas.ui.components.ImportDialog
 
 class MainActivity : ComponentActivity() {
 
@@ -43,6 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            var showGeminiDialog by remember { mutableStateOf(false) }
             // Passamos o viewModel inteiro para o App principal
             ExamSimulatorApp(
                 viewModel = viewModel,
@@ -50,8 +56,22 @@ class MainActivity : ComponentActivity() {
                 onCreateBackup = { createBackupLauncher.launch(gerarNomeBackup()) },
                 onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) },
                 onShowInstructions = { exportarInstrucoesJson(this) },
-                onImportGemini = {buscarEGravarDados()}
+                onImportGemini = { showGeminiDialog = true }
             )
+
+            if (showGeminiDialog) {
+                ImportDialog(
+                    onDismiss = { showGeminiDialog = false }, // Fecha se cancelar
+                    onImportFile = {
+                        showGeminiDialog = false
+                        filePickerLauncher.launch("*/*")
+                    },
+                    onImportGemini = { promptUsuario ->
+                        showGeminiDialog = false
+                        buscarEGravarDados(promptUsuario) // Dispara a IA com o texto digitado
+                    }
+                )
+            }
         }
     }
 
@@ -143,9 +163,12 @@ class MainActivity : ComponentActivity() {
     val model = Firebase.ai(backend = GenerativeBackend.googleAI())
         .generativeModel("gemini-3-flash-preview")
 
-    fun buscarEGravarDados() {
+    fun buscarEGravarDados(ementaPersonalizada: String) {
+
+        val ementaFinal = if (ementaPersonalizada.isNotBlank()) ementaPersonalizada else "Tecnologia da Informação"
+
         val prompt = """Monte um simulado gerando o maior numero de questões possíveis, baseado na ementa:
-        "Formação de palavras: derivação / Frase, oração e período / Tipos de verbo", e enquadre ao layout JSON :
+        $ementaFinal, e enquadre ao layout JSON :
         "[
         {
             "pergunta": "Texto da pergunta",
