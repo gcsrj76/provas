@@ -14,6 +14,11 @@ import com.papito.provas.viewmodel.ExamViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.ai.type.GenerativeBackend
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -44,7 +49,8 @@ class MainActivity : ComponentActivity() {
                 onFilePickerClick = { filePickerLauncher.launch("*/*") },
                 onCreateBackup = { createBackupLauncher.launch(gerarNomeBackup()) },
                 onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) },
-                onShowInstructions = { exportarInstrucoesJson(this) }
+                onShowInstructions = { exportarInstrucoesJson(this) },
+                onImportGemini = {buscarEGravarDados()}
             )
         }
     }
@@ -133,4 +139,55 @@ class MainActivity : ComponentActivity() {
         val shareIntent = android.content.Intent.createChooser(sendIntent, "Salvar Instruções")
         context.startActivity(shareIntent)
     }
+
+    val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+        .generativeModel("gemini-3-flash-preview")
+
+    fun buscarEGravarDados() {
+        val prompt = """Monte um simulado gerando o maior numero de questões possíveis, baseado na ementa:
+        "Formação de palavras: derivação / Frase, oração e período / Tipos de verbo", e enquadre ao layout JSON :
+        "[
+        {
+            "pergunta": "Texto da pergunta",
+            "opcao_a": "Opção A",
+            "opcao_b": "Opção B",
+            "opcao_c": "Opção C",
+            "opcao_d": "Opção D",
+            "correta": "<opção correta>",
+            "dica": "Conteudo para auxiliar o entendimento da questao",
+            "texto_referencia": "Vazio",
+            "materia": "Vazio"
+        }
+        ]". Observação: é fundamental que todo o conteúdo retornado sejam apenas os dados do Json, 
+        ou seja, você não deve incluir nenhuma informação, além do json, na sua resposta.
+        """.trimIndent()
+
+        // O lifecycleScope garante que, se o usuário fechar o app, a busca seja cancelada
+        lifecycleScope.launch {
+            try {
+                val response = model.generateContent(prompt)
+
+                // Corrigindo o erro de String? vs String:
+                // Usamos o operador elvis (?: "") para garantir uma string vazia se for null,
+                // ou fazemos um check de segurança.
+                val importJSON = response.text
+
+                if (!importJSON.isNullOrBlank()) {
+                    // Corrigindo o erro de Context:
+                    // Usamos this@MainActivity para referenciar a Activity
+                    JsonParser.importQuestionsJSONContent(this@MainActivity, importJSON)
+
+                    // Importante: Recarregar o ViewModel após a gravação
+                    viewModel.loadQuestionsFromDatabase()
+                } else {
+                    Toast.makeText(this@MainActivity, "IA não retornou dados", Toast.LENGTH_SHORT).show()
+                }
+
+            } catch (e: Exception) {
+                // Use a Main Dispatcher para Toasts dentro de catch se necessário
+                Toast.makeText(this@MainActivity, "Erro na IA: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 }
+

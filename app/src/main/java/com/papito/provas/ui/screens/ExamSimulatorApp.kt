@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +27,8 @@ fun ExamSimulatorApp(
     onFilePickerClick: () -> Unit,
     onCreateBackup: () -> Unit,
     onRestoreBackup: () -> Unit,
-    onShowInstructions: () -> Unit // Nova ação para o botão de interrogação
+    onShowInstructions: () -> Unit,
+    onImportGemini: () -> Unit
 ) {
     val questions = viewModel.questoesCarregadas
     val isSimuladoIniciado = questions.any { it.givenAnswerId != null }
@@ -144,7 +144,7 @@ fun ExamSimulatorApp(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // --- ÁREA DE IMPORTAÇÃO (80/20) ---
+                        // --- ÁREA DE IMPORTAÇÃO (90/10) ---
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -175,6 +175,18 @@ fun ExamSimulatorApp(
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Botão Importar (90%)
+                        OutlinedButton(
+                            onClick = onImportGemini,
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(0.5.dp, Color.DarkGray)
+                        ) {
+                            Text("Importar Gemini", color = Color.LightGray, fontSize = 13.sp)
                         }
 
                         if (questions.isNotEmpty()) {
