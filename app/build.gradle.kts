@@ -72,5 +72,6 @@ dependencies {
     // Add the dependency for the Firebase AI Logic library. When using the BoM,
     // you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-ai")
-    //implementation("com.google.firebase:firebase-analytics")
+
+    implementation("androidx.fragment:fragment-ktx:1.5.0")
 }

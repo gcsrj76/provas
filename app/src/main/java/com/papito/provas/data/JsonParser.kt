@@ -84,7 +84,7 @@ object JsonParser {
                 dbHelper.insertFullQuestion(statement, referenceText,tip, answerList)
             }
 
-            Toast.makeText(context, "Base gerada por IA com sucesso!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Questões geradas por IA com sucesso!", Toast.LENGTH_SHORT).show()
 
         } catch (e: Exception) {
             e.printStackTrace()

@@ -2,6 +2,7 @@ package com.papito.provas.viewmodel
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
@@ -27,6 +28,8 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     private var timerJob: Job? = null
+
+    var isLoadingGemini by mutableStateOf(false)
 
     init {
         // Carrega os dados assim que o ViewModel é criado

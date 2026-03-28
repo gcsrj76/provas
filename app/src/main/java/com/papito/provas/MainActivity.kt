@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
             // Passamos o viewModel inteiro para o App principal
             ExamSimulatorApp(
                 viewModel = viewModel,
-                onFilePickerClick = { filePickerLauncher.launch("*/*") },
                 onCreateBackup = { createBackupLauncher.launch(gerarNomeBackup()) },
                 onRestoreBackup = { restoreBackupLauncher.launch(arrayOf("*/*")) },
                 onShowInstructions = { exportarInstrucoesJson(this) },
@@ -188,6 +187,8 @@ class MainActivity : ComponentActivity() {
         // O lifecycleScope garante que, se o usuário fechar o app, a busca seja cancelada
         lifecycleScope.launch {
             try {
+                viewModel.isLoadingGemini = true
+
                 val response = model.generateContent(prompt)
 
                 // Corrigindo o erro de String? vs String:
@@ -202,12 +203,15 @@ class MainActivity : ComponentActivity() {
 
                     // Importante: Recarregar o ViewModel após a gravação
                     viewModel.loadQuestionsFromDatabase()
+                    viewModel.isLoadingGemini = false
                 } else {
+                    viewModel.isLoadingGemini = false
                     Toast.makeText(this@MainActivity, "IA não retornou dados", Toast.LENGTH_SHORT).show()
                 }
 
             } catch (e: Exception) {
                 // Use a Main Dispatcher para Toasts dentro de catch se necessário
+                viewModel.isLoadingGemini = false
                 Toast.makeText(this@MainActivity, "Erro na IA: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }

@@ -7,10 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.KeyboardArrowUp   // Para o Backup
-import androidx.compose.material.icons.filled.KeyboardArrowDown // Para o Restore
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info // Ícone de ajuda
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings // Ícone legal para IA
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,11 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.papito.provas.viewmodel.ExamViewModel
+import com.papito.provas.ui.components.GeminiLoadingOverlay
 
 @Composable
 fun ExamSimulatorApp(
     viewModel: ExamViewModel,
-    onFilePickerClick: () -> Unit,
     onCreateBackup: () -> Unit,
     onRestoreBackup: () -> Unit,
     onShowInstructions: () -> Unit,
@@ -33,10 +34,8 @@ fun ExamSimulatorApp(
     val questions = viewModel.questoesCarregadas
     val isSimuladoIniciado = questions.any { it.givenAnswerId != null }
 
-    var currentQuestionIndex by remember(questions.size) {
-        val firstPending = questions.indexOfFirst { it.givenAnswerId == null }
-        mutableIntStateOf(if (firstPending != -1) firstPending else 0)
-    }
+    // Ajuste: O index só deve ser calculado na primeira vez ou quando entrar na tela de questões
+    var currentQuestionIndex by remember { mutableIntStateOf(0) }
 
     var showQuestions by remember { mutableStateOf(false) }
     var showResult by remember { mutableStateOf(false) }
@@ -45,17 +44,19 @@ fun ExamSimulatorApp(
         modifier = Modifier.fillMaxSize(),
         color = Color.Black
     ) {
+        // Camada de Loading Superior
+        if (viewModel.isLoadingGemini) {
+            GeminiLoadingOverlay()
+        }
+
         when {
-            // --- TELA INICIAL (MENU) ---
             !showQuestions && !showResult -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
-                        modifier = Modifier.fillMaxSize().padding(24.dp),
+                        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -89,7 +90,6 @@ fun ExamSimulatorApp(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // --- UTILITÁRIO DE ESTUDO ---
                         OutlinedButton(
                             onClick = { viewModel.shuffle() },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -97,104 +97,63 @@ fun ExamSimulatorApp(
                             border = BorderStroke(1.dp, if (isSimuladoIniciado) Color.DarkGray else Color.Gray),
                             enabled = !isSimuladoIniciado
                         ) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = if (isSimuladoIniciado) Color.DarkGray else Color.White
-                            )
+                            Icon(Icons.Default.Refresh, null, Modifier.size(18.dp), tint = if (isSimuladoIniciado) Color.DarkGray else Color.White)
                             Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Embaralhar Ordem",
-                                color = if (isSimuladoIniciado) Color.DarkGray else Color.White
-                            )
+                            Text("Embaralhar Ordem", color = if (isSimuladoIniciado) Color.DarkGray else Color.White)
                         }
 
                         Spacer(modifier = Modifier.height(48.dp))
 
                         // --- SEÇÃO TÉCNICA ---
-                        Text(
-                            "GERENCIAMENTO DE DADOS",
-                            color = Color.DarkGray,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Divider(
-                            color = Color.DarkGray,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                        Text("GERENCIAMENTO DE DADOS", color = Color.DarkGray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            SmallTechnicalButton(
-                                "Backup",
-                                Icons.Default.KeyboardArrowUp,
-                                onCreateBackup,
-                                Modifier.weight(1f)
-                            )
-                            SmallTechnicalButton(
-                                "Restore",
-                                Icons.Default.KeyboardArrowDown,
-                                onRestoreBackup,
-                                Modifier.weight(1f)
-                            )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            SmallTechnicalButton("Backup", Icons.Default.KeyboardArrowUp, onCreateBackup, Modifier.weight(1f))
+                            SmallTechnicalButton("Restore", Icons.Default.KeyboardArrowDown, onRestoreBackup, Modifier.weight(1f))
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        // --- ÁREA DE IMPORTAÇÃO (90/10) ---
+                        // --- ÁREA DE IMPORTAÇÃO (Unificada no Diálogo) ---
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
-                            // Botão Importar (90%)
-                            OutlinedButton(
+                            Button(
                                 onClick = onImportGemini,
-                                modifier = Modifier.weight(0.9f).height(50.dp),
+                                modifier = Modifier.weight(0.85f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(0.5.dp, Color.DarkGray)
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D2D2D))
                             ) {
-                                Text("Importar Questões", color = Color.LightGray, fontSize = 13.sp)
+                                Icon(Icons.Default.Settings, null, Modifier.size(16.dp), tint = Color(0xFF009688))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Importar Questões", color = Color.White, fontSize = 13.sp)
                             }
 
-                            // Botão Ajuda (10%)
                             OutlinedButton(
                                 onClick = onShowInstructions,
-                                modifier = Modifier.weight(0.1f).height(50.dp),
+                                modifier = Modifier.weight(0.15f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 border = BorderStroke(0.5.dp, Color.DarkGray),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Instruções",
-                                    tint = Color.LightGray,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Icon(Icons.Default.Info, "Ajuda", tint = Color.Gray, modifier = Modifier.size(20.dp))
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         if (questions.isNotEmpty()) {
-                            TextButton(
-                                onClick = { viewModel.resetarBancoCompleto() },
-                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red, modifier = Modifier.size(16.dp))
+                            TextButton(onClick = { viewModel.resetarBancoCompleto() }, modifier = Modifier.padding(top = 16.dp)) {
+                                Icon(Icons.Default.Delete, null, tint = Color.Red.copy(alpha = 0.6f), modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Limpar tudo", color = Color.Red, fontSize = 12.sp)
+                                Text("Limpar Banco de Dados", color = Color.Red.copy(alpha = 0.6f), fontSize = 11.sp)
                             }
                         }
                     }
                 }
             }
 
-            // --- TELA DE QUESTÕES ---
             showQuestions -> {
                 QuestionScreen(
                     viewModel = viewModel,
@@ -208,14 +167,12 @@ fun ExamSimulatorApp(
                     },
                     onPausar = {
                         viewModel.pararTimer()
-                        showResult = false
                         showQuestions = false
                     },
                     onQuestionSelect = { index -> currentQuestionIndex = index }
                 )
             }
 
-            // --- TELA DE RESULTADOS ---
             showResult -> {
                 ResultScreen(
                     questions = questions,
@@ -223,7 +180,6 @@ fun ExamSimulatorApp(
                     onVoltarMenu = {
                         showResult = false
                         showQuestions = false
-                        currentQuestionIndex = 0
                     },
                     onReiniciarSimulado = {
                         viewModel.limparApenasRespostas()
@@ -238,26 +194,15 @@ fun ExamSimulatorApp(
 }
 
 @Composable
-fun SmallTechnicalButton(
-    text: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun SmallTechnicalButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp, Color.Gray),
-        contentPadding = PaddingValues(horizontal = 8.dp)
+        border = BorderStroke(0.5.dp, Color.DarkGray)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = Color.White
-        )
+        Icon(icon, null, Modifier.size(18.dp), tint = Color.Gray)
         Spacer(Modifier.width(8.dp))
-        Text(text, color = Color.White, fontSize = 12.sp)
+        Text(text, color = Color.Gray, fontSize = 12.sp)
     }
 }
