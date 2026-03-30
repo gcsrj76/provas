@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +40,8 @@ fun ExamSimulatorApp(
 
     var showQuestions by remember { mutableStateOf(false) }
     var showResult by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -65,8 +68,7 @@ fun ExamSimulatorApp(
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-                        // --- AÇÃO PRINCIPAL ---
-                        Button(
+                        OutlinedButton(
                             onClick = {
                                 if (questions.isNotEmpty()) {
                                     val firstPending = questions.indexOfFirst { it.givenAnswerId == null }
@@ -75,31 +77,33 @@ fun ExamSimulatorApp(
                                     showQuestions = true
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth().height(64.dp),
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))
+                            border = BorderStroke(1.dp, if (questions.isNotEmpty()) Color.White else Color.DarkGray),
+                            colors = if (questions.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Color(0xFF009688))else ButtonDefaults.buttonColors(containerColor = Color.Black)
                         ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            Icon(Icons.Default.PlayArrow, null, Modifier.size(18.dp), tint = if (questions.isNotEmpty()) Color.White else Color.DarkGray)
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = if (isSimuladoIniciado) "CONTINUAR SIMULADO" else "INICIAR SIMULADO",
                                 fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = if (questions.isNotEmpty()) Color.White else Color.DarkGray
                             )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedButton(
-                            onClick = { viewModel.shuffle() },
+                            onClick = { viewModel.shuffle(context) },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, if (isSimuladoIniciado) Color.DarkGray else Color.Gray),
-                            enabled = !isSimuladoIniciado
+                            border = BorderStroke(1.dp, if (!isSimuladoIniciado && questions.isNotEmpty()) Color.Gray else Color.DarkGray),
+                            enabled = !isSimuladoIniciado && questions.isNotEmpty()
                         ) {
-                            Icon(Icons.Default.Refresh, null, Modifier.size(18.dp), tint = if (isSimuladoIniciado) Color.DarkGray else Color.White)
+                            Icon(Icons.Default.Refresh, null, Modifier.size(18.dp), tint = if (!isSimuladoIniciado && questions.isNotEmpty()) Color.White else Color.DarkGray)
                             Spacer(Modifier.width(8.dp))
-                            Text("Embaralhar Ordem", color = if (isSimuladoIniciado) Color.DarkGray else Color.White)
+                            Text("Embaralhar Ordem", color = if (!isSimuladoIniciado && questions.isNotEmpty()) Color.White else Color.DarkGray)
                         }
 
                         Spacer(modifier = Modifier.height(48.dp))
@@ -109,9 +113,11 @@ fun ExamSimulatorApp(
                         Divider(color = Color.DarkGray, modifier = Modifier.padding(vertical = 8.dp))
 
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            SmallTechnicalButton("Backup", Icons.Default.KeyboardArrowUp, onCreateBackup, Modifier.weight(1f))
-                            SmallTechnicalButton("Restore", Icons.Default.KeyboardArrowDown, onRestoreBackup, Modifier.weight(1f))
+                            SmallTechnicalButton("Backup", Icons.Default.KeyboardArrowUp, onCreateBackup, Modifier.weight(1f),questions.isNotEmpty())
+                            SmallTechnicalButton("Restore", Icons.Default.KeyboardArrowDown, onRestoreBackup, Modifier.weight(1f),true)
                         }
+
+                        /**Text("Embaralhar Ordem", color = if (!isSimuladoIniciado && questions.isNotEmpty()) Color.White else Color.DarkGray)*/
 
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -121,10 +127,11 @@ fun ExamSimulatorApp(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Button(
+                            OutlinedButton(
                                 onClick = onImportGemini,
                                 modifier = Modifier.weight(0.85f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(0.5.dp, Color.White),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D2D2D))
                             ) {
                                 Icon(Icons.Default.Settings, null, Modifier.size(16.dp), tint = Color(0xFF009688))
@@ -194,15 +201,16 @@ fun ExamSimulatorApp(
 }
 
 @Composable
-fun SmallTechnicalButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SmallTechnicalButton(text: String, icon: ImageVector, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp, Color.DarkGray)
+        border = BorderStroke(0.5.dp, if (enabled) Color.Gray else Color.DarkGray),
+        enabled = enabled
     ) {
-        Icon(icon, null, Modifier.size(18.dp), tint = Color.Gray)
+        Icon(icon, null, Modifier.size(18.dp), tint = if (enabled) Color.Gray else Color.DarkGray)
         Spacer(Modifier.width(8.dp))
-        Text(text, color = Color.Gray, fontSize = 12.sp)
+        Text(text, color = if (enabled) Color.White else Color.DarkGray, fontSize = 12.sp)
     }
 }

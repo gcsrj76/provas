@@ -5,6 +5,111 @@ import android.net.Uri
 import android.widget.Toast
 import org.json.JSONArray
 
+/** Estrutura JSON
+ *
+  [
+    {
+      "statement": "<Enunciado da questão>",
+      "reference_text": "<Texto de referência>",
+      "tip": "<Dica>",
+      "answers": [
+        {
+          "text": "<1ª Opção>",
+          "is_correct": 0
+        },
+        {
+          "text": "<2ª Opção>",
+          "is_correct": 1
+        },
+        {
+          "text": "<3ª Opção>",
+          "is_correct": 0
+        },
+        {
+          "text": "<4ª Opção>",
+          "is_correct": 0
+        }
+      ]
+    }
+  ]
+ */
+
+object JsonParser {
+
+    /**
+     * Importação via arquivo local (URI)
+     */
+    fun importQuestionsJSON(context: Context, uri: Uri) {
+        try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val jsonString = inputStream?.bufferedReader().use { it?.readText() } ?: ""
+
+            // Reutiliza a lógica de processamento de String
+            processJsonContent(context, jsonString, "JSON importado com sucesso!")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Erro ao abrir arquivo: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    /**
+     * Importação via String direta (Conteúdo vindo do Gemini)
+     */
+    fun importQuestionsJSONContent(context: Context, jsonString: String) {
+        processJsonContent(context, jsonString, "Questões geradas por IA com sucesso!")
+    }
+
+    /**
+     * LÓGICA CENTRALIZADA PARA A NOVA ESTRUTURA
+     */
+    private fun processJsonContent(context: Context, jsonString: String, successMessage: String) {
+        try {
+            val dbHelper = DatabaseHelper(context)
+            val jsonArray = JSONArray(jsonString)
+
+            for (i in 0 until jsonArray.length()) {
+                val obj = jsonArray.getJSONObject(i)
+
+                // 1. Mapeia os campos da nova estrutura
+                val statement = obj.getString("statement")
+                val referenceText = obj.optString("reference_text", null)
+                val tip = obj.optString("tip", "")
+
+                // 2. Processa a lista de respostas (Array aninhado)
+                val answersArray = obj.getJSONArray("answers")
+                val answerList = mutableListOf<Pair<String, Boolean>>()
+
+                for (j in 0 until answersArray.length()) {
+                    val answerObj = answersArray.getJSONObject(j)
+                    val text = answerObj.getString("text")
+
+                    // Suporta tanto booleano (true/false) quanto inteiro (1/0) do JSON
+                    val isCorrect = if (answerObj.get("is_correct") is Boolean) {
+                        answerObj.getBoolean("is_correct")
+                    } else {
+                        answerObj.getInt("is_correct") == 1
+                    }
+
+                    answerList.add(Pair(text, isCorrect))
+                }
+
+                // 3. Validação básica: Só insere se houver enunciado e respostas
+                if (statement.isNotBlank() && answerList.isNotEmpty()) {
+                    dbHelper.insertFullQuestion(statement, referenceText, tip, answerList)
+                }
+            }
+
+            Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Toast no contexto de UI para avisar se o formato JSON estiver errado
+            Toast.makeText(context, "Erro no formato do JSON: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+}
+
+/**
 object JsonParser {
 
     fun importQuestionsJSON(context: Context, uri: Uri) {
@@ -92,3 +197,4 @@ object JsonParser {
         }
     }
 }
+        */

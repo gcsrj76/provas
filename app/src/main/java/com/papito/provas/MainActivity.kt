@@ -44,6 +44,21 @@ class MainActivity : ComponentActivity() {
         uri?.let { viewModel.restoreBackup(it, this) }
     }
 
+    private val layoutJson ="""
+        [
+            {
+                "statement": "<Enunciado da questão>",
+                "reference_text": "<Texto de referência>",
+                "tip": "<Dica>",
+                "answers": [
+                { "text": "<1ª Opção>", "is_correct": 0 },
+                { "text": "<2ª Opção>", "is_correct": 0 },
+                { "text": "<3ª Opção>", "is_correct": 1 },
+                { "text": "<4ª Opção>", "is_correct": 0 }
+                ]
+            }
+        ]""".trimIndent()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -109,45 +124,21 @@ class MainActivity : ComponentActivity() {
 
     private fun exportarInstrucoesJson(context: Context) {
         val instrucoes = """
-        - Solicite a geraçao das questoes pela IA;
-        - Copie e cole o conteudo gerado em um arquivo;
-        - Salve o arquivo com uma extensao .json;
-         
-        Estrutura do arquivo JSON para importçao:
-        
-        O arquivo deve ser uma lista [] de objetos, seguindo este padrão:
-        "[
-        {
-        "pergunta": "Texto da pergunta",
-        "opcao_a": "Opção A",
-        "opcao_b": "Opção B",
-        "opcao_c": "Opção C",
-        "opcao_d": "Opção D",
-        "correta": "<opção correta>",
-        "link_conteudo": "Vazio",
-        "texto_referencia": "Vazio",
-        "materia": "Vazio"
-        }
-        ]"
-        
-        Exemplo de prompt de solicitaçao para a IA:        
-        
-        Monte um simulado gerando o maior numero de questões possíveis, baseado na ementa:
-        "Formação de palavras: derivação / Frase, oração e período / Tipos de verbo", e enquadre ao layout JSON : 
-        "[
-            {
-                "pergunta": "Texto da pergunta",
-                "opcao_a": "Opção A",
-                "opcao_b": "Opção B",
-                "opcao_c": "Opção C",
-                "opcao_d": "Opção D",
-                "correta": "<opção correta>",
-                "dica": "Conteudo para auxiliar o entendimento da questao",
-                "texto_referencia": "Vazio",
-                "materia": "Vazio"
-            }
-        ]"
-    """.trimIndent()
+            - Solicite a geração das questões pela IA;
+            - Copie e cole o conteúdo gerado em um arquivo;
+            - Salve o arquivo com uma extensão .json;
+             
+            Estrutura do arquivo JSON para importação:
+            
+            O arquivo deve ser uma lista [] de objetos, seguindo este padrão:
+            $layoutJson
+            
+            Exemplo de prompt de solicitação para a IA:        
+            
+            Monte um simulado gerando o maior número de questões possíveis, baseado na ementa:
+            "Formação de palavras: derivação / Frase, oração e período / Tipos de verbo", e enquadre ao layout JSON:
+            $layoutJson
+        """.trimIndent() // Agora tudo está dentro das aspas e formatado
 
         // Lógica para salvar ou compartilhar o texto...
         val sendIntent: android.content.Intent = android.content.Intent().apply {
@@ -168,19 +159,7 @@ class MainActivity : ComponentActivity() {
 
         val prompt = """Monte um simulado gerando o maior numero de questões possíveis, baseado na ementa:
         $ementaFinal, e enquadre ao layout JSON :
-        "[
-        {
-            "pergunta": "Texto da pergunta",
-            "opcao_a": "Opção A",
-            "opcao_b": "Opção B",
-            "opcao_c": "Opção C",
-            "opcao_d": "Opção D",
-            "correta": "<opção correta>",
-            "dica": "Conteudo para auxiliar o entendimento da questao",
-            "texto_referencia": "Vazio",
-            "materia": "Vazio"
-        }
-        ]". Observação: é fundamental que todo o conteúdo retornado sejam apenas os dados do Json, 
+        $layoutJson. Observação: é fundamental que todo o conteúdo retornado sejam apenas os dados do Json,
         ou seja, você não deve incluir nenhuma informação, além do json, na sua resposta.
         """.trimIndent()
 

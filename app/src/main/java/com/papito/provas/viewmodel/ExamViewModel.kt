@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.papito.provas.data.DatabaseHelper
@@ -111,9 +112,10 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
         dbHelper.backupDatabase(context, uri)
     }
 
-    fun shuffle() {
+    fun shuffle(context: Context) {
         dbHelper.shuffleDatabasePhysically()
         loadQuestionsFromDatabase() // Recarrega a UI com a nova ordem vinda do DB
+        Toast.makeText(context, "Questões embaralhadas com sucesso!", Toast.LENGTH_SHORT).show()
     }
 
     // Funções do Temporizador (Coroutines)
