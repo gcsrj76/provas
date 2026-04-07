@@ -17,7 +17,7 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
             tip TEXT,
             given_answer_id INTEGER,
             sort_order INTEGER  
-    )
+        )
         """.trimIndent()
         db.execSQL(createTableQuestion)
 
@@ -40,25 +40,19 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         onCreate(db)
     }
 
-    fun insertFullQuestion(statement: String, refText: String?, tip: String?, answerList: List<Pair<String, Boolean>>) {
+    // NOVA FUNCIONALIDADE: Atualiza o conteúdo de uma questão e suas respostas
+    fun updateQuestionContent(questionId: Int, newStatement: String, newAnswerTexts: List<Pair<Int, String>>) {
         val db = this.writableDatabase
         db.beginTransaction()
         try {
-            val qValues = ContentValues().apply {
-                put("statement", statement)
-                put("reference_text", refText)
-                put("tip", tip)
-            }
-            val questionId = db.insert("questions", null, qValues)
+            // Atualiza enunciado
+            val qValues = ContentValues().apply { put("statement", newStatement) }
+            db.update("questions", qValues, "id = ?", arrayOf(questionId.toString()))
 
-            answerList.forEachIndexed { index, pair ->
-                val aValues = ContentValues().apply {
-                    put("question_id", questionId)
-                    put("text", pair.first)
-                    put("is_correct", if (pair.second) 1 else 0)
-                    put("sort_order", index)
-                }
-                db.insert("answers", null, aValues)
+            // Atualiza cada resposta pelo seu ID
+            newAnswerTexts.forEach { (ansId, ansText) ->
+                val aValues = ContentValues().apply { put("text", ansText) }
+                db.update("answers", aValues, "id = ?", arrayOf(ansId.toString()))
             }
             db.setTransactionSuccessful()
         } finally {
@@ -66,84 +60,58 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         }
     }
 
-    // Método para salvar a escolha do usuário
+    fun insertFullQuestion(statement: String, refText: String?, tip: String?, answerList: List<Pair<String, Boolean>>) {
+        val db = this.writableDatabase
+        val qValues = ContentValues().apply {
+            put("statement", statement)
+            put("reference_text", refText)
+            put("tip", tip)
+        }
+        val qId = db.insert("questions", null, qValues).toInt()
+
+        answerList.forEachIndexed { index, pair ->
+            val aValues = ContentValues().apply {
+                put("question_id", qId)
+                put("text", pair.first)
+                put("is_correct", if (pair.second) 1 else 0)
+                put("sort_order", index)
+            }
+            db.insert("answers", null, aValues)
+        }
+    }
+
     fun saveUserAnswer(questionId: Int, answerId: Int) {
         val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put("given_answer_id", answerId)
-        }
+        val values = ContentValues().apply { put("given_answer_id", answerId) }
         db.update("questions", values, "id = ?", arrayOf(questionId.toString()))
     }
-    // Limpa apenas as respostas dadas (reinicia o simulado)
+
     fun clearUserAnswers() {
         val db = this.writableDatabase
-        val values = ContentValues().apply {
-            putNull("given_answer_id")
-        }
+        val values = ContentValues().apply { putNull("given_answer_id") }
         db.update("questions", values, null, null)
     }
 
-    // Limpa todo o banco de dados (todas as questões e respostas)
     fun clearDatabase() {
         val db = this.writableDatabase
-        db.beginTransaction() // Inicia transação para segurança
+        db.delete("answers", null, null)
+        db.delete("questions", null, null)
+    }
+
+    fun backupDatabase(context: Context, uri: Uri) {
         try {
-            // 1. Remove os dados das tabelas (Nomes padronizados em inglês)
-            // O DELETE em 'questions' removerá 'answers' se o CASCADE estiver ativo,
-            // mas executamos em ambos para garantir limpeza total.
-            db.execSQL("DELETE FROM answers")
-            db.execSQL("DELETE FROM questions")
-
-            // 2. Reseta os contadores de ID do SQLite
-            db.execSQL("DELETE FROM sqlite_sequence WHERE name='questions'")
-            db.execSQL("DELETE FROM sqlite_sequence WHERE name='answers'")
-
-            db.setTransactionSuccessful() // Confirma as alterações
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Aqui você poderia registrar o erro em um log ou avisar a UI
-        } finally {
-            db.endTransaction() // Finaliza a transação
-        }
-    }
-
-    fun backupDatabase(context: Context, outUri: Uri): Boolean {
-        val db = this.writableDatabase
-
-        return try {
-            db.rawQuery("PRAGMA wal_checkpoint(FULL);", null).use { it.moveToFirst() }
-            this.close()
-
-            val dbName = "simulador.db"
-            val dbFile = context.getDatabasePath(dbName)
-
-            if (dbFile.exists() && dbFile.length() > 0) {
-                context.contentResolver.openOutputStream(outUri)?.use { output ->
-                    dbFile.inputStream().use { input ->
-                        input.copyTo(output)
-                    }
-                }
-                true
-            } else {
-                android.util.Log.e("BACKUP_ERROR", "Arquivo não encontrado ou vazio em: ${dbFile.absolutePath}")
-                false
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("BACKUP_ERROR", "Falha catastrófica: ${e.message}")
-            false
-        }
-    }
-
-    fun restoreDatabase(context: Context, inUri: Uri): Boolean {
-        return try {
-            this.close() // Crucial: fecha o banco antes de sobrescrever o arquivo
-
             val dbFile = context.getDatabasePath("simulador.db")
+            context.contentResolver.openOutputStream(uri)?.use { output ->
+                dbFile.inputStream().use { input -> input.copyTo(output) }
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
 
-            context.contentResolver.openInputStream(inUri)?.use { input ->
-                dbFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
+    fun restoreDatabase(context: Context, uri: Uri): Boolean {
+        return try {
+            val dbFile = context.getDatabasePath("simulador.db")
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                dbFile.outputStream().use { output -> input.copyTo(output) }
             }
             true
         } catch (e: Exception) {
@@ -156,7 +124,6 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
         val db = this.writableDatabase
         db.beginTransaction()
         try {
-            // 1. EMBARALHAR QUESTÕES
             val questionIds = mutableListOf<Int>()
             db.rawQuery("SELECT id FROM questions", null).use { cursor ->
                 while (cursor.moveToNext()) questionIds.add(cursor.getInt(0))
@@ -167,7 +134,6 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
                 db.update("questions", values, "id = ?", arrayOf(id.toString()))
             }
 
-            // 2. EMBARALHAR RESPOSTAS (dentro de cada questão)
             questionIds.forEach { qId ->
                 val answerIds = mutableListOf<Int>()
                 db.rawQuery("SELECT id FROM answers WHERE question_id = ?", arrayOf(qId.toString())).use { cursor ->

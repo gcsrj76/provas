@@ -82,6 +82,18 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
         questoesCarregadas.addAll(newQuestionsList)
     }
 
+    fun updateQuestion(questionId: Int, newStatement: String, newAnswerTexts: List<Pair<Int, String>>) {
+        viewModelScope.launch {
+            try {
+                dbHelper.updateQuestionContent(questionId, newStatement, newAnswerTexts)
+                // Recarrega a lista para refletir as mudanças imediatamente na UI
+                loadQuestionsFromDatabase()
+            } catch (e: Exception) {
+                // Erro tratado silenciosamente
+            }
+        }
+    }
+
     fun selectAnswer(questionId: Int, answerId: Int) {
         // 1. Salva no banco de dados imediatamente
         dbHelper.saveUserAnswer(questionId, answerId)
