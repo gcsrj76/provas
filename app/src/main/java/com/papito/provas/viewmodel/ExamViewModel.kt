@@ -82,10 +82,10 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
         questoesCarregadas.addAll(newQuestionsList)
     }
 
-    fun updateQuestion(questionId: Int, newStatement: String, newAnswerTexts: List<Pair<Int, String>>) {
+    fun updateQuestion(questionId: Int, newStatement: String, newAnswerUpdates: List<Triple<Int, String, Boolean>>) {
         viewModelScope.launch {
             try {
-                dbHelper.updateQuestionContent(questionId, newStatement, newAnswerTexts)
+                dbHelper.updateQuestionContent(questionId, newStatement, newAnswerUpdates)
                 // Recarrega a lista para refletir as mudanças imediatamente na UI
                 loadQuestionsFromDatabase()
             } catch (e: Exception) {

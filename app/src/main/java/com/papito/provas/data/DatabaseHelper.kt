@@ -41,17 +41,20 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, "
     }
 
     // NOVA FUNCIONALIDADE: Atualiza o conteúdo de uma questão e suas respostas
-    fun updateQuestionContent(questionId: Int, newStatement: String, newAnswerTexts: List<Pair<Int, String>>) {
+    fun updateQuestionContent(questionId: Int, newStatement: String, newAnswerUpdates: List<Triple<Int, String, Boolean>>) {
         val db = this.writableDatabase
         db.beginTransaction()
         try {
-            // Atualiza enunciado
+            // 1. Atualiza enunciado
             val qValues = ContentValues().apply { put("statement", newStatement) }
             db.update("questions", qValues, "id = ?", arrayOf(questionId.toString()))
 
-            // Atualiza cada resposta pelo seu ID
-            newAnswerTexts.forEach { (ansId, ansText) ->
-                val aValues = ContentValues().apply { put("text", ansText) }
+            // 2. Atualiza cada resposta pelo seu ID (texto e se é a correta)
+            newAnswerUpdates.forEach { (ansId, ansText, isCorrect) ->
+                val aValues = ContentValues().apply {
+                    put("text", ansText)
+                    put("is_correct", if (isCorrect) 1 else 0)
+                }
                 db.update("answers", aValues, "id = ?", arrayOf(ansId.toString()))
             }
             db.setTransactionSuccessful()
