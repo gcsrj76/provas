@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 @Composable
 fun GeminiLoadingOverlay(
@@ -50,7 +50,7 @@ fun GeminiLoadingOverlay(
                 
                 Text(
                     text = message,
-                    color = AppColors.atual.FontePadrao,
+                    color = Tema.atual.FontePadrao,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )

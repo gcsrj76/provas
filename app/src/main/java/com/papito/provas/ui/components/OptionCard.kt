@@ -13,11 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 
 @Composable
@@ -32,8 +31,8 @@ fun OptionCard(
 ) {
     // Lógica da borda colorida (Verde para acerto, Vermelho para erro)
     val borderStroke = when {
-        isCorrect == true && isSelected -> BorderStroke(2.dp, AppColors.atual.Certo)
-        isCorrect == false && isSelected -> BorderStroke(2.dp, AppColors.atual.Errado)
+        isCorrect == true && isSelected -> BorderStroke(2.dp, Tema.atual.Certo)
+        isCorrect == false && isSelected -> BorderStroke(2.dp, Tema.atual.Errado)
         else -> null
     }
 
@@ -41,7 +40,7 @@ fun OptionCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = isClickable) { onClick() },
-        colors = CardDefaults.cardColors(containerColor = AppColors.atual.BotaoPadrao),
+        colors = CardDefaults.cardColors(containerColor = Tema.atual.BotaoPadrao),
         shape = RoundedCornerShape(8.dp),
         border = borderStroke
     ) {
@@ -50,7 +49,7 @@ fun OptionCard(
                 Text(
                     text = "${letra.uppercase()})",
                     fontWeight = FontWeight.Bold,
-                    color = AppColors.atual.FontePadrao,
+                    color = Tema.atual.FontePadrao,
                     modifier = Modifier.width(30.dp)
                 )
 
@@ -58,19 +57,19 @@ fun OptionCard(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Erro",
-                        tint = AppColors.atual.Errado,
+                        tint = Tema.atual.Errado,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
 
-                Text(texto, color = AppColors.atual.FontePadrao, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                Text(texto, color = Tema.atual.FontePadrao, fontSize = 14.sp, modifier = Modifier.weight(1f))
             }
 
             if (isCorrect == false && isSelected) {
                 Text(
                     text = "✓ Resposta correta: ${correctAnswerLetter ?: ""}",
-                    color = AppColors.atual.Certo,
+                    color = Tema.atual.Certo,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp),
                     fontWeight = FontWeight.Bold

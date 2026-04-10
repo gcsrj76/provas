@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.papito.provas.R
 import com.papito.provas.model.Question
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 @Composable
 fun ResultScreen(
@@ -38,13 +38,15 @@ fun ResultScreen(
     val total = questions.size
     val aproveitamento = if (total > 0) (acertos * 100) / total else 0
 
-    Image(
-        painter = painterResource(id = R.drawable.fundo_gatinhos),
-        contentDescription = null,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-        alpha = 0.8f
-    )
+    Tema.atual.BackgroundResource?.let { resId ->
+        Image(
+            painter = painterResource(id = resId),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.8f // Ajuste a transparência conforme o gosto
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -56,7 +58,7 @@ fun ResultScreen(
             text = "Resultado Final",
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = AppColors.atual.FonteDestaque
+            color = Tema.atual.FonteDestaque
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -64,7 +66,7 @@ fun ResultScreen(
         // CARD PRINCIPAL - Ajustado para centralização total
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = AppColors.atual.BotaoPadrao),
+            colors = CardDefaults.cardColors(containerColor = Tema.atual.BotaoPadrao),
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(
@@ -78,12 +80,12 @@ fun ResultScreen(
                     text = "$acertos/$total",
                     fontSize = 64.sp,
                     fontWeight = FontWeight.Black,
-                    color = AppColors.atual.FontePadrao,
+                    color = Tema.atual.FontePadrao,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = "questões corretas",
-                    color = AppColors.atual.FontePadrao,
+                    color = Tema.atual.FontePadrao,
                     textAlign = TextAlign.Center
                 )
 
@@ -118,12 +120,12 @@ fun ResultScreen(
         Button(
             onClick = onVoltarMenu,
             modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPrincipal),
+            colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPrincipal),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = AppColors.atual.FontePadrao)
+            Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = Tema.atual.FontePadrao)
             Spacer(Modifier.width(8.dp))
-            Text("TELA PRINCIPAL", fontWeight = FontWeight.Bold, color = AppColors.atual.FontePadrao)
+            Text("TELA PRINCIPAL", fontWeight = FontWeight.Bold, color = Tema.atual.FontePadrao)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -132,12 +134,12 @@ fun ResultScreen(
             onClick = onReiniciarSimulado,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(12.dp),
-            border = BorderStroke(1.dp, AppColors.atual.BotaoPadrao),
-            colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoSuave)
+            border = BorderStroke(1.dp, Tema.atual.BotaoPadrao),
+            colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoSuave)
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = null, tint = AppColors.atual.BotaoPadrao)
+            Icon(Icons.Default.Refresh, contentDescription = null, tint = Tema.atual.BotaoPadrao)
             Spacer(Modifier.width(8.dp))
-            Text("Reiniciar Avaliação", color = AppColors.atual.BotaoPadrao, fontSize = 16.sp)
+            Text("Reiniciar Avaliação", color = Tema.atual.BotaoPadrao, fontSize = 16.sp)
         }
     }
 }
@@ -145,14 +147,14 @@ fun ResultScreen(
 fun StatCard(label: String, value: String, icon: ImageVector, modifier: Modifier) {
     Surface(
         modifier = modifier,
-        color = AppColors.atual.BotaoPadrao,
+        color = Tema.atual.BotaoPadrao,
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(0.5.dp, AppColors.atual.BordaPadrao)
+        border = BorderStroke(0.5.dp, Tema.atual.BordaPadrao)
     ) {
         Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, null, tint = AppColors.atual.FontePadrao, modifier = Modifier.size(16.dp))
-            Text(value, color = AppColors.atual.FontePadrao, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(label, color = AppColors.atual.FontePadrao, fontSize = 12.sp)
+            Icon(icon, null, tint = Tema.atual.FontePadrao, modifier = Modifier.size(16.dp))
+            Text(value, color = Tema.atual.FontePadrao, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(label, color = Tema.atual.FontePadrao, fontSize = 12.sp)
         }
     }
 }

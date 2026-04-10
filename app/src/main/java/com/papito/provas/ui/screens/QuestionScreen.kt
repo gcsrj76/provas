@@ -1,6 +1,5 @@
 package com.papito.provas.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,10 +34,9 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.papito.provas.R
-import com.papito.provas.ui.theme.AppColors.atual
 import com.papito.provas.viewmodel.ExamViewModel
 import kotlin.math.abs
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 @Composable
 fun QuestionScreen(
@@ -87,13 +85,15 @@ fun QuestionScreen(
     fun getLetterByOrder(order: Int): String = ('a' + order).toString()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.fundo_gatinhos),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.5f
-        )
+        Tema.atual.BackgroundResource?.let { resId ->
+            Image(
+                painter = painterResource(id = resId),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.5f // Ajuste a transparência conforme o gosto
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -132,14 +132,14 @@ fun QuestionScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Questão ${currentIndex + 1}/${questions.size}",
-                        color = AppColors.atual.FonteDestaque,
+                        color = Tema.atual.FonteDestaque,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = viewModel.formatarTempo(),
-                            color = AppColors.atual.FonteDestaque,
+                            color = Tema.atual.FonteDestaque,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -167,7 +167,7 @@ fun QuestionScreen(
                             Icon(
                                 imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
                                 contentDescription = if (isEditing) "Salvar" else "Editar",
-                                tint = if (isEditing) AppColors.atual.BotaoPadrao else AppColors.atual.BotaoSuave,
+                                tint = if (isEditing) Tema.atual.BotaoPadrao else Tema.atual.BotaoSuave,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -180,25 +180,25 @@ fun QuestionScreen(
                     valueRange = 0f..(if (questions.size > 1) (questions.size - 1).toFloat() else 1f),
                     modifier = Modifier.weight(2f).padding(horizontal = 8.dp),
                     colors = SliderDefaults.colors(
-                        thumbColor = AppColors.atual.BotaoPadrao,
-                        activeTrackColor = AppColors.atual.BotaoPadrao,
-                        inactiveTrackColor = AppColors.atual.BotaoSuave
+                        thumbColor = Tema.atual.BotaoPadrao,
+                        activeTrackColor = Tema.atual.BotaoPadrao,
+                        inactiveTrackColor = Tema.atual.BotaoSuave
                     )
                 )
 
                 Row {
                     Box(
-                        modifier = Modifier.size(28.dp).clip(CircleShape).background(AppColors.atual.Certo),
+                        modifier = Modifier.size(28.dp).clip(CircleShape).background(Tema.atual.Certo),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("$correctCount", color = AppColors.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("$correctCount", color = Tema.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(
-                        modifier = Modifier.size(28.dp).clip(CircleShape).background(AppColors.atual.Errado),
+                        modifier = Modifier.size(28.dp).clip(CircleShape).background(Tema.atual.Errado),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("$wrongCount", color = AppColors.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("$wrongCount", color = Tema.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -222,17 +222,17 @@ fun QuestionScreen(
                         BasicTextField(
                             value = editedStatement,
                             onValueChange = { editedStatement = it },
-                            textStyle = TextStyle(color = AppColors.atual.FontePadrao, fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                            textStyle = TextStyle(color = Tema.atual.FontePadrao, fontSize = 18.sp, fontWeight = FontWeight.Bold),
                             cursorBrush = SolidColor(Color.White),
                             modifier = Modifier
                                 .weight(1f)
-                                .background(AppColors.atual.BotaoPadrao.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                .background(Tema.atual.BotaoPadrao.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                 .padding(4.dp)
                         )
                     } else {
                         Text(
                             text = "${currentIndex + 1}) ${currentQuestion.statement}",
-                            color = AppColors.atual.FontePadrao,
+                            color = Tema.atual.FontePadrao,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f)
@@ -267,25 +267,25 @@ fun QuestionScreen(
                                 selected = editedCorrectAnswerId == answer.id,
                                 onClick = { editedCorrectAnswerId = answer.id },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = AppColors.atual.Certo,
+                                    selectedColor = Tema.atual.Certo,
                                     unselectedColor = Color.Gray
                                 )
                             )
 
                             Text(
                                 text = getLetterByOrder(answer.sortOrder).uppercase() + ")",
-                                color = AppColors.atual.FonteDestaque,
+                                color = Tema.atual.FonteDestaque,
                                 modifier = Modifier.width(25.dp)
                             )
 
                             BasicTextField(
                                 value = editedAnswers[index].value,
                                 onValueChange = { editedAnswers[index].value = it },
-                                textStyle = TextStyle(color = AppColors.atual.FontePadrao, fontSize = 14.sp),
+                                textStyle = TextStyle(color = Tema.atual.FontePadrao, fontSize = 14.sp),
                                 cursorBrush = SolidColor(Color.White),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(AppColors.atual.BotaoPadrao.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                                    .background(Tema.atual.BotaoPadrao.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
                                     .padding(8.dp)
                             )
                         }
@@ -321,7 +321,7 @@ fun QuestionScreen(
                     enabled = currentIndex > 0 && !isEditing,
                     modifier = Modifier.weight(1f).height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPadrao)
+                    colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPadrao)
                 ) {
                     Text("Anterior", fontSize = 12.sp)
                 }
@@ -331,7 +331,7 @@ fun QuestionScreen(
                     enabled = !isEditing,
                     modifier = Modifier.weight(1f).height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoSuave)
+                    colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoSuave)
                 ) {
                     Text("Pausa", fontSize = 12.sp)
                 }
@@ -341,7 +341,7 @@ fun QuestionScreen(
                     enabled = !isEditing,
                     modifier = Modifier.weight(1f).height(50.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPadrao)
+                    colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPadrao)
                 ) {
                     Text(
                         text = if (currentIndex == questions.size - 1) "Finalizar" else "Próxima",
@@ -360,7 +360,7 @@ fun QuestionScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFFFC107))
                     Spacer(Modifier.width(8.dp))
-                    Text("Dica da Questão", color = AppColors.atual.FontePadrao)
+                    Text("Dica da Questão", color = Tema.atual.FontePadrao)
                 }
             },
             text = {

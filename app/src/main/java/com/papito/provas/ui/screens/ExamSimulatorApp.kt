@@ -26,12 +26,11 @@ import androidx.compose.ui.layout.ContentScale
 import com.papito.provas.viewmodel.ExamViewModel
 import com.papito.provas.ui.components.GeminiLoadingOverlay
 import com.papito.provas.R
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 
 
 // Se você for usar o modificador .paint() para repetir o fundo
-import androidx.compose.ui.draw.paint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 
@@ -73,13 +72,15 @@ fun ExamSimulatorApp(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.fundo_gatinhos),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                        alpha = 0.8f
-                    )
+                    Tema.atual.BackgroundResource?.let { resId ->
+                        Image(
+                            painter = painterResource(id = resId),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop,
+                            alpha = 0.8f // Ajuste a transparência conforme o gosto
+                        )
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -90,8 +91,8 @@ fun ExamSimulatorApp(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text("Pingo Prov@s", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = AppColors.atual.FontePadrao)
-                        Text("(${questions.size} questões)", color = AppColors.atual.FonteSuave, fontSize = 14.sp)
+                        Text("Pingo Prov@s", fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Tema.atual.FontePadrao)
+                        Text("(${questions.size} questões)", color = Tema.atual.FonteSuave, fontSize = 14.sp)
 
                         Spacer(modifier = Modifier.height(40.dp))
 
@@ -106,16 +107,16 @@ fun ExamSimulatorApp(
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, if (questions.isNotEmpty()) AppColors.atual.BordaPadrao else Color.DarkGray),
-                            colors = if (questions.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPrincipal)else ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPrincipalDesabilitado)
+                            border = BorderStroke(1.dp, if (questions.isNotEmpty()) Tema.atual.BordaPadrao else Color.DarkGray),
+                            colors = if (questions.isNotEmpty()) ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPrincipal)else ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPrincipalDesabilitado)
                         ) {
-                            Icon(Icons.Default.PlayArrow, null, Modifier.size(18.dp), tint = if (questions.isNotEmpty()) AppColors.atual.FontePadrao else AppColors.atual.FonteDesabilitada)
+                            Icon(Icons.Default.PlayArrow, null, Modifier.size(18.dp), tint = if (questions.isNotEmpty()) Tema.atual.FontePadrao else Tema.atual.FonteDesabilitada)
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = if (isSimuladoIniciado) "CONTINUAR SIMULADO" else "INICIAR SIMULADO",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (questions.isNotEmpty()) AppColors.atual.FontePadrao else AppColors.atual.FonteDesabilitada
+                                color = if (questions.isNotEmpty()) Tema.atual.FontePadrao else Tema.atual.FonteDesabilitada
                             )
                         }
 
@@ -125,19 +126,19 @@ fun ExamSimulatorApp(
                             onClick = { viewModel.shuffle(context) },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, if (!isSimuladoIniciado && questions.isNotEmpty()) AppColors.atual.BordaPadrao else AppColors.atual.BordaDesabilitada),
+                            border = BorderStroke(1.dp, if (!isSimuladoIniciado && questions.isNotEmpty()) Tema.atual.BordaPadrao else Tema.atual.BordaDesabilitada),
                             enabled = !isSimuladoIniciado && questions.isNotEmpty()
                         ) {
-                            Icon(Icons.Default.Refresh, null, Modifier.size(18.dp), tint = if (!isSimuladoIniciado && questions.isNotEmpty()) AppColors.atual.FontePadrao else AppColors.atual.FonteDesabilitada)
+                            Icon(Icons.Default.Refresh, null, Modifier.size(18.dp), tint = if (!isSimuladoIniciado && questions.isNotEmpty()) Tema.atual.FontePadrao else Tema.atual.FonteDesabilitada)
                             Spacer(Modifier.width(8.dp))
-                            Text("Embaralhar Ordem", color = if (!isSimuladoIniciado && questions.isNotEmpty()) AppColors.atual.FontePadrao else AppColors.atual.FonteDesabilitada)
+                            Text("Embaralhar Ordem", color = if (!isSimuladoIniciado && questions.isNotEmpty()) Tema.atual.FontePadrao else Tema.atual.FonteDesabilitada)
                         }
 
                         Spacer(modifier = Modifier.height(48.dp))
 
                         // --- SEÇÃO TÉCNICA ---
-                        Text("GERENCIAMENTO DE DADOS", color = AppColors.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Divider(color = AppColors.atual.BordaPadraoSuave, modifier = Modifier.padding(vertical = 8.dp))
+                        Text("GERENCIAMENTO DE DADOS", color = Tema.atual.FontePadrao, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Divider(color = Tema.atual.BordaPadraoSuave, modifier = Modifier.padding(vertical = 8.dp))
 
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             SmallTechnicalButton("Backup", Icons.Default.KeyboardArrowUp, onCreateBackup, Modifier.weight(1f),questions.isNotEmpty())
@@ -156,30 +157,30 @@ fun ExamSimulatorApp(
                                 onClick = onImportGemini,
                                 modifier = Modifier.weight(0.85f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(0.5.dp, AppColors.atual.BordaPadrao),
-                                colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoSuave)
+                                border = BorderStroke(0.5.dp, Tema.atual.BordaPadrao),
+                                colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoSuave)
                             ) {
-                                Icon(Icons.Default.Settings, null, Modifier.size(16.dp), tint = AppColors.atual.FontePadrao)
+                                Icon(Icons.Default.Settings, null, Modifier.size(16.dp), tint = Tema.atual.FontePadrao)
                                 Spacer(Modifier.width(8.dp))
-                                Text("Importar Questões", color = AppColors.atual.FontePadrao, fontSize = 13.sp)
+                                Text("Importar Questões", color = Tema.atual.FontePadrao, fontSize = 13.sp)
                             }
 
                             OutlinedButton(
                                 onClick = onShowInstructions,
                                 modifier = Modifier.weight(0.15f).height(50.dp),
                                 shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(0.5.dp, AppColors.atual.BordaPadraoSuave),
+                                border = BorderStroke(0.5.dp, Tema.atual.BordaPadraoSuave),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
-                                Icon(Icons.Default.Info, "Ajuda", tint = AppColors.atual.FontePadrao, modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Info, "Ajuda", tint = Tema.atual.FontePadrao, modifier = Modifier.size(20.dp))
                             }
                         }
 
                         if (questions.isNotEmpty()) {
                             TextButton(onClick = { viewModel.resetarBancoCompleto() }, modifier = Modifier.padding(top = 16.dp)) {
-                                Icon(Icons.Default.Delete, null, tint = AppColors.atual.FonteAlerta, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.Delete, null, tint = Tema.atual.FonteAlerta, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Limpar Banco de Dados", color = AppColors.atual.FonteAlerta, fontSize = 13.sp)
+                                Text("Limpar Banco de Dados", color = Tema.atual.FonteAlerta, fontSize = 13.sp)
                             }
                         }
                     }
@@ -231,11 +232,11 @@ fun SmallTechnicalButton(text: String, icon: ImageVector, onClick: () -> Unit, m
         onClick = onClick,
         modifier = modifier.height(48.dp),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.5.dp, if (enabled) AppColors.atual.BordaPadraoSuave else AppColors.atual.BordaDesabilitada),
+        border = BorderStroke(0.5.dp, if (enabled) Tema.atual.BordaPadraoSuave else Tema.atual.BordaDesabilitada),
         enabled = enabled
     ) {
-        Icon(icon, null, Modifier.size(18.dp), tint = if (enabled) AppColors.atual.BordaPadraoSuave else AppColors.atual.BordaDesabilitada)
+        Icon(icon, null, Modifier.size(18.dp), tint = if (enabled) Tema.atual.BordaPadraoSuave else Tema.atual.BordaDesabilitada)
         Spacer(Modifier.width(8.dp))
-        Text(text, color = if (enabled) AppColors.atual.FontePadrao else AppColors.atual.FonteDesabilitada, fontSize = 12.sp)
+        Text(text, color = if (enabled) Tema.atual.FontePadrao else Tema.atual.FonteDesabilitada, fontSize = 12.sp)
     }
 }

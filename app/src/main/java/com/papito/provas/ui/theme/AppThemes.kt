@@ -1,7 +1,15 @@
 package com.papito.provas.ui.theme
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-interface AppThemeColors {
+import com.papito.provas.R
+
+// A interface deve definir claramente o tipo como opcional com '?'
+interface AppTheme {
+    val BackgroundResource: Int?
+
     val BotaoPrincipal: Color
     val BotaoPrincipalDesabilitado: Color
     val BotaoPadrao: Color
@@ -22,13 +30,15 @@ interface AppThemeColors {
     val Errado: Color
 }
 
-object TemaRosa : AppThemeColors {
+object TemaRosa : AppTheme {
+    // Implementação com imagem
+    override val BackgroundResource = R.drawable.fundo_gatinhos
+
     override val BotaoPrincipal = Color(0xFF5B0B4D)
     override val BotaoPrincipalDesabilitado = Color(0x335B0B4D)
     override val BotaoPadrao = Color(0xFF5B0B4D)
     override val BotaoSuave = Color(0x995B0B4D)
     override val FonteDestaque = Color(0xFF5B0B4D)
-    //override val FontePadrao = Color(0xFFE1BADB)
     override val FontePadrao = Color(0xFFE3D1E0)
     override val FonteSuave = Color(0xB3E1BADB)
     override val FonteDesabilitada = Color(0x33E1BADB)
@@ -38,14 +48,13 @@ object TemaRosa : AppThemeColors {
     override val BordaDesabilitada = Color(0x33F165D8)
     override val CardEscuro = Color(0xFF2A0423)
     override val CardMedio = Color(0xFF4F0641)
-//    override val Certo = Color(0xFF166419)
-//    override val Errado = Color(0xFF981E1E)
     override val Certo = Color(0xFF88B688)
     override val Errado = Color(0xFFC47D7D)
-
 }
 
-object TemaPadrao : AppThemeColors {
+object TemaPadrao : AppTheme {
+    override val BackgroundResource: Int? = null
+
     override val BotaoPrincipal = Color(0xFF354080)
     override val BotaoPrincipalDesabilitado = Color(0x33354080)
     override val BotaoPadrao = Color(0xFF354080)
@@ -60,13 +69,10 @@ object TemaPadrao : AppThemeColors {
     override val BordaDesabilitada = Color(0x335A6CD7)
     override val CardEscuro = Color(0xFF171C36)
     override val CardMedio = Color(0xFF262E59)
-    //    override val Certo = Color(0xFF166419)
-//    override val Errado = Color(0xFF981E1E)
     override val Certo = Color(0xFF88B688)
     override val Errado = Color(0xFFC47D7D)
-
 }
 
-object AppColors {
-    val atual: AppThemeColors = TemaPadrao
+object Tema {
+    var atual: AppTheme by mutableStateOf(TemaRosa)
 }

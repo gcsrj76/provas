@@ -9,11 +9,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight // Import necessário para o erro da imagem
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.papito.provas.ui.theme.AppColors
+import com.papito.provas.ui.theme.Tema
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,14 +36,14 @@ fun ImportDialog(
                 .padding(16.dp)
                 .heightIn(max = 550.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = AppColors.atual.CardEscuro)
+            colors = CardDefaults.cardColors(containerColor = Tema.atual.CardEscuro)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
                     text = "Selecione o Método",
-                    color = AppColors.atual.FontePadrao,
+                    color = Tema.atual.FontePadrao,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -70,22 +69,22 @@ fun ImportDialog(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedTextColor = AppColors.atual.FontePadrao,
-                                focusedTextColor = AppColors.atual.FontePadrao,
-                                unfocusedLabelColor = AppColors.atual.BordaPadraoSuave,
-                                focusedLabelColor = AppColors.atual.BordaPadrao,
-                                focusedBorderColor = AppColors.atual.BordaPadrao
+                                unfocusedTextColor = Tema.atual.FontePadrao,
+                                focusedTextColor = Tema.atual.FontePadrao,
+                                unfocusedLabelColor = Tema.atual.BordaPadraoSuave,
+                                focusedLabelColor = Tema.atual.BordaPadrao,
+                                focusedBorderColor = Tema.atual.BordaPadrao
                             )
                         )
 
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
-                            modifier = Modifier.background(AppColors.atual.CardMedio)
+                            modifier = Modifier.background(Tema.atual.CardMedio)
                         ) {
                             options.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option, color = AppColors.atual.FontePadrao) },
+                                    text = { Text(option, color = Tema.atual.FontePadrao) },
                                     onClick = {
                                         selectedOption = option
                                         expanded = false
@@ -105,11 +104,11 @@ fun ImportDialog(
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 5,
                             colors = OutlinedTextFieldDefaults.colors(
-                                unfocusedTextColor = AppColors.atual.FontePadrao,
-                                focusedTextColor = AppColors.atual.FontePadrao,
-                                unfocusedLabelColor = AppColors.atual.FonteSuave,
-                                focusedLabelColor = AppColors.atual.BordaPadraoSuave,
-                                focusedBorderColor = AppColors.atual.BordaPadraoSuave
+                                unfocusedTextColor = Tema.atual.FontePadrao,
+                                focusedTextColor = Tema.atual.FontePadrao,
+                                unfocusedLabelColor = Tema.atual.FonteSuave,
+                                focusedLabelColor = Tema.atual.BordaPadraoSuave,
+                                focusedBorderColor = Tema.atual.BordaPadraoSuave
                             )
                         )
                     }
@@ -122,7 +121,7 @@ fun ImportDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("CANCELAR", color = AppColors.atual.FontePadrao)
+                        Text("CANCELAR", color = Tema.atual.FontePadrao)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -135,7 +134,7 @@ fun ImportDialog(
                                 onImportGemini(geminiPrompt)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.atual.BotaoPrincipal),
+                        colors = ButtonDefaults.buttonColors(containerColor = Tema.atual.BotaoPrincipal),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("CONTINUAR", fontWeight = FontWeight.Bold)
