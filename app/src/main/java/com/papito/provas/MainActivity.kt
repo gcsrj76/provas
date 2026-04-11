@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
                 if (isJson) {
                     JsonParser.importQuestionsJSON(this, it)
                 } /**else {
-                    dbHelper.importarQuestoesDB(it)
+                dbHelper.importarQuestoesDB(it)
                 }*/
 
                 // Após importar, avisamos o ViewModel para recarregar os dados
@@ -196,4 +196,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

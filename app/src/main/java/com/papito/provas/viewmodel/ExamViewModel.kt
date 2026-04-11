@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class ExamViewModel(application: Application) : AndroidViewModel(application) {
     private val dbHelper = DatabaseHelper(application)
-    
+
     // Objeto centralizado para acesso direto das telas
     val questoesCarregadas = mutableStateListOf<Question>()
 
@@ -31,6 +31,9 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
     private var timerJob: Job? = null
 
     var isLoadingGemini by mutableStateOf(false)
+
+    var mostrarAnimacaoAcerto by mutableStateOf(false)
+    var mostrarAnimacaoErro by mutableStateOf(false)
 
     init {
         // Carrega os dados assim que o ViewModel é criado
@@ -95,11 +98,20 @@ class ExamViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectAnswer(questionId: Int, answerId: Int) {
-        // 1. Salva no banco de dados imediatamente
+        // 1. Antes de salvar, verificamos se ela acertou para disparar o gatinho
+        val questao = questoesCarregadas.find { it.id == questionId }
+        val respostaEscolhida = questao?.answers?.find { it.id == answerId }
+
+        if (respostaEscolhida?.isCorrect == true) {
+            mostrarAnimacaoAcerto = true
+        } else {
+            mostrarAnimacaoErro = true
+        }
+
+        // 2. Salva no banco de dados imediatamente (Seu código original)
         dbHelper.saveUserAnswer(questionId, answerId)
 
-        // 2. Sincroniza a memória com o banco
-        // Isso atualiza a lista 'questoesCarregadas' e reflete na UI
+        // 3. Sincroniza a memória com o banco (Seu código original)
         loadQuestionsFromDatabase()
     }
 

@@ -74,4 +74,6 @@ dependencies {
     implementation("com.google.firebase:firebase-ai")
 
     implementation("androidx.fragment:fragment-ktx:1.5.0")
+
+    implementation("com.airbnb.android:lottie-compose:6.4.0")
 }

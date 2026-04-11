@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "35982992122",
-    "project_id": "provas-866b2",
-    "storage_bucket": "provas-866b2.firebasestorage.app"
+    "project_number": "890679363855",
+    "project_id": "pingo-provas",
+    "storage_bucket": "pingo-provas.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:35982992122:android:47ddcfdb8d19da4c645f43",
+        "mobilesdk_app_id": "1:890679363855:android:824513852e4c884bde967a",
         "android_client_info": {
           "package_name": "com.papito.provas"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAOfdtktnFy2KZZKcdgH9O7hFioBdBoNi4"
+          "current_key": "AIzaSyCSxLVABl5bXCJifOMnY-MWNPKvBN6ujlA"
         }
       ],
       "services": {

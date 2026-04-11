@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.papito.provas.ui.theme.AppTheme
 import com.papito.provas.ui.theme.Tema
 
 @Composable
@@ -32,7 +33,7 @@ fun GeminiLoadingOverlay(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(200.dp)
-                .background(Color(0xFF1A1A1A), shape = RoundedCornerShape(16.dp)) 
+                .background(Tema.atual.CardEscuro, shape = RoundedCornerShape(16.dp))
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,7 +42,7 @@ fun GeminiLoadingOverlay(
             ) {
                 // O círculo giratório padrão do Material3
                 CircularProgressIndicator(
-                    color = Color(0xFF009688), // O verde padrão do seu app
+                    color = Tema.atual.BotaoPadrao,
                     strokeWidth = 4.dp,
                     modifier = Modifier.size(50.dp)
                 )

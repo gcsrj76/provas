@@ -10,6 +10,9 @@ import com.papito.provas.R
 interface AppTheme {
     val BackgroundResource: Int?
 
+    val AnimacaoWrong: Int?
+    val AnimacaoRight: Int?
+
     val BotaoPrincipal: Color
     val BotaoPrincipalDesabilitado: Color
     val BotaoPadrao: Color
@@ -34,6 +37,9 @@ object TemaRosa : AppTheme {
     // Implementação com imagem
     override val BackgroundResource = R.drawable.fundo_gatinhos
 
+    override val AnimacaoWrong = R.raw.gatinho_na_caixa
+    override val AnimacaoRight = R.raw.gatinho_dancante
+
     override val BotaoPrincipal = Color(0xFF5B0B4D)
     override val BotaoPrincipalDesabilitado = Color(0x335B0B4D)
     override val BotaoPadrao = Color(0xFF5B0B4D)
@@ -54,6 +60,9 @@ object TemaRosa : AppTheme {
 
 object TemaPadrao : AppTheme {
     override val BackgroundResource: Int? = null
+
+    override val AnimacaoWrong: Int? = null
+    override val AnimacaoRight: Int? = null
 
     override val BotaoPrincipal = Color(0xFF354080)
     override val BotaoPrincipalDesabilitado = Color(0x33354080)
